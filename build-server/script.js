@@ -4,14 +4,15 @@ const path = require('path')
 const fs = require('fs')
 const {S3Client, PutObjectCommand} = require('@aws-sdk/client-s3')
 const mime = require('mime-types')
+require('dotenv').config()
 
 // Put object command is for putting files in S3
-
+// codebay-outputs
 const s3Client = new S3Client({
-    region: '',
+    region: procoess.env.AWS_REGION,
     credentials: {
-        accessKeyId: '',
-        secretAccessKey: ''
+        accessKeyId: process.env.IAM_ACCESS_KEY,
+        secretAccessKey: process.env.IAM_SECRET_KEY
     }
 })
 
@@ -46,22 +47,28 @@ const init = async () => {
         
         // Reading dist folder, and storing all files in an array recursively
         const distFolderContents = fs.readdirSync(distFolderPath, {recursive: true})
-
+ 
         for( const filePath of distFolderContents ) { // looping through all files in dist folder
             if(fs.lstatSync(filePath).isDirectory()) continue; // skip directories, only apply on files
 
-            
+            console.log(`Uploading ${filePath}`)
+
+            // in S3 bucket, all files will be stored in __outputs folder
             const command = new PutObjectCommand({
                 Bucket: '',
                 Key: `__outputs/${PROJECT_ID}/${filePath}`,
-                Body: fs.createReadStream(filePath),
-                contentType: mime.lookup(filePath)
+                Body: fs.createReadStream(filePath),        // creating a stream for uplaoding
+                contentType: mime.lookup(filePath)          // mime will auto detect file type and send
             })
             
             await s3Client.send(command);  // After tis, the files will start uploading in s3 bucket
+
+            console.log(`Uploaded`)
         };
 
         console.log('Done....')
     })
 
 }
+
+init()
