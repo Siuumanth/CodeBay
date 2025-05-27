@@ -1,24 +1,24 @@
 {
   "main": {
-    "id": "e1d3b92f27f66950",
+    "id": "fcbb4753ef99c56c",
     "type": "split",
     "children": [
       {
-        "id": "76d4f45834ade902",
+        "id": "bd28621a024e4e3a",
         "type": "tabs",
         "children": [
           {
-            "id": "983319ed1e46767c",
+            "id": "9471d7cf443b51f8",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/2-containers.md",
+                "file": "notes.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2-containers"
+              "title": "notes"
             }
           }
         ]
@@ -27,15 +27,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "8c8702a22651d053",
+    "id": "1828a51f0617c123",
     "type": "split",
     "children": [
       {
-        "id": "02776421387464a9",
+        "id": "2f9f0838a474410d",
         "type": "tabs",
         "children": [
           {
-            "id": "e94bf872af416bc7",
+            "id": "69563fe4db1f0a37",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -48,7 +48,7 @@
             }
           },
           {
-            "id": "a1b1349ab0caed0e",
+            "id": "866ec1d188cb8010",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -65,7 +65,7 @@
             }
           },
           {
-            "id": "c1400f2f490b9ded",
+            "id": "b5ebd918af4ffa28",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -81,20 +81,20 @@
     "width": 300
   },
   "right": {
-    "id": "7525d8b26feb4be3",
+    "id": "5c93cf1eba4b9b86",
     "type": "split",
     "children": [
       {
-        "id": "c41bf9a24723f023",
+        "id": "ff4a8f95cc70c3fb",
         "type": "tabs",
         "children": [
           {
-            "id": "307e12162a10498a",
+            "id": "6fc91f16499b70af",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "notes/2-containers.md",
+                "file": "notes.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,25 +104,25 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 2-containers"
+              "title": "Backlinks for notes"
             }
           },
           {
-            "id": "e9bfbe6d1631dbe9",
+            "id": "ae5ef1f45b82287b",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "notes/2-containers.md",
+                "file": "notes.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from 2-containers"
+              "title": "Outgoing links from notes"
             }
           },
           {
-            "id": "9ba6ea63826ad1f7",
+            "id": "26edac600f634947",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -137,18 +137,18 @@
             }
           },
           {
-            "id": "c00833c7f7a749b5",
+            "id": "b52b8100119b120f",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "notes/2-containers.md",
+                "file": "notes.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 2-containers"
+              "title": "Outline of notes"
             }
           }
         ]
@@ -168,10 +168,6 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "983319ed1e46767c",
-  "lastOpenFiles": [
-    "notes/Screenshot 2025-05-27 053445.png",
-    "Screenshot 2025-05-27 053445.png",
-    "notes/2-containers.md"
-  ]
+  "active": "9471d7cf443b51f8",
+  "lastOpenFiles": []
 }
