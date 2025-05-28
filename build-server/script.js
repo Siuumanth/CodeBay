@@ -9,7 +9,7 @@ require('dotenv').config()
 // Put object command is for putting files in S3
 // codebay-outputs
 const s3Client = new S3Client({
-    region: procoess.env.AWS_REGION,
+    region: process.env.AWS_REGION,
     credentials: {
         accessKeyId: process.env.IAM_ACCESS_KEY,
         secretAccessKey: process.env.IAM_SECRET_KEY
