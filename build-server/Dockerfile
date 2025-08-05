@@ -3,7 +3,7 @@ FROM ubuntu:focal
 
 RUN apt-get update
 RUN apt-get install -y curl
-# for making api calls to install dependencies
+# curl is for making api calls to install dependencies from terminal
 
 # setting up node version 20
 # -sL for silent download, silent download means no progress bar
@@ -17,7 +17,7 @@ RUN apt-get upgrade -y
 RUN apt-get install -y nodejs
 RUN apt-get install git -y
 
-# Chanige working directory
+# Changing working directory
 WORKDIR /home/app
 
 COPY main.sh main.sh
@@ -29,5 +29,5 @@ RUN npm install
 RUN chmod +x script.js
 RUN chmod +x main.sh
 
-# After everyting gets installed
+# After everyting gets installed, run this command to start the server
 ENTRYPOINT [ "/home/app/main.sh" ]

@@ -1,90 +1,119 @@
-## 🔧 Vercel Clone – Deployment Setup Documentation
+## 🚀 CodeBay – Vercel Clone Deployment System
 
-### 1. **Dockerfile**
+![[Pasted image 20250805173111.png]]
 
-Prepare a `Dockerfile` to define your build environment. It should contain instructions to:
+CodeBay is a self-hosted deployment platform inspired by Vercel. It lets users deploy frontend projects directly from GitHub repositories. Behind the scenes, CodeBay builds the project inside an isolated Docker container and hosts the final static files on AWS S3. This setup ensures builds are reproducible, isolated, and secure.
 
-- Use a base Node.js image
-- Git clone and copy project files
+This document explains the architecture and then walks through the complete deployment setup using Docker, Node.js, and AWS services.
+
+---
+## 🧠 How CodeBay Works – High-Level Architecture
+
+This section provides an overview of the entire deployment workflow, from user input to live hosting.
+
+1. **User Input:**
+    - A user enters a **GitHub repository URL** via the CodeBay UI.
+        
+2. **API Trigger:**
+    - The backend (Node.js) receives the URL and generates a unique `private_key` (used as an identifier).
+    - It then triggers a build by launching a Docker container on **AWS ECS**.
+        
+3. **Docker-based Build:**
+    - Inside this short-lived container:
+        - The repo is cloned.
+        - Dependencies are installed.
+        - The frontend project is built (e.g., using `npm run build`).
+        - The output directory (`/dist` or `/build`) is uploaded to AWS S3 under a name spaced folder using the `private_key`.
+            
+4. **Static File Hosting:**
+    - The uploaded files are served directly from S3 (with public access), simulating how Vercel delivers builds.
+        
+> ✅ Each deployment is isolated, disposable, and repeatable.  
+> 🔁 The container runs, builds, uploads, and exits automatically.
+
+---
+## 🔧 1. Dockerfile – Build Environment
+
+This Dockerfile defines a clean, controlled environment that installs Node.js, Git, and other necessary tools to automate project builds inside the container.
 
 ```dockerfile
-# base image
-
 FROM ubuntu:focal
 
-RUN apt-get update
-RUN apt-get install -y curl
+RUN apt-get update && apt-get install -y curl git
 
-# for making api calls to install dependencies
-# setting up node version 20
-# -sL for silent download, silent download means no progress bar
-# adding node source repo
+# Install Node.js v20
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get upgrade -y && \
+    apt-get install -y nodejs
 
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get upgrade -y
-  
-# actually installing node n git
-RUN apt-get install -y nodejs
-RUN apt-get install git -y
-# Chanige working directory
+# Set working directory
 WORKDIR /home/app
+
+# Copy the bootstrapping script
 COPY main.sh main.sh
-# After everyting gets installed
+
+# Run deployment logic automatically on container start
 ENTRYPOINT [ "/home/app/main.sh" ]
 ```
 
-> This ensures the build process is repeatable and platform-independent.
+> ✅ This image is built once and stored in **AWS ECR**.  
+> 🔁 For every deployment, ECS launches a container from this image.
 
 ---
+## 🖥️ 2. main.sh – Bootstrapping Script
 
-### 2. **Shell Script**
+This shell script runs when the container starts. It’s responsible for fetching the code and triggering the build logic.
+### Responsibilities:
+- Reads the GitHub repo URL from an environment variable.
+- Clones the repo into a directory.
+- Launches the Node.js script that handles build + upload.
 
-Create a shell script (e.g., `deploy.sh`) to automate:
-
-- Navigating to the working directory
-- Running the Docker build process
-- Executing the Node.js build script
-- Triggering the upload process (via `script.js`)
 ```bash
-    #!/bin/bash
+#!/bin/bash
 
-export GIT_REPOSITORY_URL = "$GIT_REPPOSITORY_URL"
-git clone "$GIT_REPOSITORY_URL" /home/app/output # clones the repo to this dir
+GIT_REPOSITORY_URL="$GIT_REPOSITORY_URL"
+git clone "$GIT_REPOSITORY_URL" /home/app/output
+
 exec node script.js
 ```
 
-> This will automate the full deployment pipeline.
+> 📌 Ensure the env variable `GIT_REPOSITORY_URL` is passed while running the container.
 
 ---
+## 📦 3. script.js – Build & Upload Logic
 
-### 3. **script.js**
+This Node.js script handles the main logic after the repo is cloned.
+### Responsibilities:
 
-This script is responsible for:
+- Navigates into the project directory (`/home/app/output`)
+- Installs project dependencies with `npm install`
+- Builds the project (`npm run build`)
+- Recursively reads the output folder (usually `dist/`)
+- Uploads each file to the specified S3 bucket under a path like: `__outputs/{private_key}/`
 
-- Installing project dependencies (`npm install`)
-- Building the project (`npm run build`)
-- Reading all files from the `dist/` folder recursively
-- Uploading them to the specified S3 bucket using AWS SDK's `PutObjectCommand`
+### Requirements:
+- AWS credentials (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`)
+- `AWS_REGION`, `BUCKET_NAME`, and `PROJECT_ID` as environment variables
+- Use `mime-types` npm package to detect content types properly for S3
 
-Ensure:
-
-- Environment variables like `PROJECT_ID`, `AWS credentials`, and `Bucket name` are set.
-- MIME types are detected properly for each file using the `mime-types` package.
-
+> ✅ This script makes your deployment portable, platform-independent, and cloud-ready.
 ---
+## ☁️ 4. AWS Setup – S3 and IAM Configuration
 
-### 4. **AWS Setup**
+This section covers setting up AWS resources for hosting static files and securing access.
 
-#### Step 1: **Create an S3 Bucket**
+### 📁 Step 1: Create an S3 Bucket
 
-- Go to the AWS Management Console → S3.
-- Create a new bucket .
-- **Region**: Choose one near your user base.
-- Uncheck block all public access.
+- Go to the AWS Console → S3 → Create Bucket
+- Choose a unique bucket name
+- Select a region near your users
+- Uncheck **"Block all public access"**
 
-#### Step 2: **Bucket Policy for Public Access**
+### 🔓 Step 2: Add a Public Read Policy
 
-Add the following policy to **Permissions > Bucket Policy**:
+This allows public access to the uploaded static files.
+
+Replace `s3name` with your bucket name:
 
 ```json
 {
@@ -95,26 +124,35 @@ Add the following policy to **Permissions > Bucket Policy**:
       "Principal": "*",
       "Action": "s3:GetObject",
       "Resource": "arn:aws:s3:::s3name/*"
-    },
-    {
-      "Sid": "AllowWebAccess",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::s3name/*"
     }
   ]
 }
 ```
 
-> Replace `s3name` with your actual bucket name. This allows public read access to all objects, making the uploaded site accessible via the web.
+### 👤 Step 3: Create an IAM User with S3 Access
 
+- Go to IAM → Users → Create New User
+    
+- Choose "Programmatic Access"
+    
+- Attach the `AmazonS3FullAccess` policy (or use a tighter scoped custom policy)
+    
+- Save the access key and secret — you'll use these in `script.js`
+    
 
-#### Step 5: **Create an IAM User**
+> 📌 Consider using environment variables or AWS Secrets Manager to manage keys securely.
 
-- Go to IAM Management Console.
-- Create a new user for programmatic access.
-- Attach the managed policy: `AmazonS3FullAccess`.
-- Save the Access Key ID and Secret Access Key.
+---
 
-> This IAM user will be used in `script.js` to programmatically upload files to S3.
+## ✅ Summary
+
+- CodeBay runs a **short-lived ECS container** per deployment.
+    
+- Each container builds the user’s repo and uploads static files to an **S3 bucket**.
+    
+- This approach provides strong isolation, reproducibility, and cloud-native scalability.
+    
+- You can extend this setup to support preview URLs, custom domains, or backend deployments using ECS (heavier setup).
+    
+
+Let me know if you want to scale this further or handle multi-stage builds or backend APIs.
