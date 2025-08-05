@@ -22,10 +22,12 @@ WORKDIR /home/app
 
 COPY main.sh main.sh
 COPY script.js script.js
-COPY package.json package.json
+COPY package*.json .
 
+# Installing dependencies
 RUN npm install
 
+# Give executable file permissions, +x = add exec permission
 RUN chmod +x script.js
 RUN chmod +x main.sh
 

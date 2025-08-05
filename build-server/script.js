@@ -58,16 +58,17 @@ const init = async () => {
 
         // While uploading files on s3, we have to give only file paths, not dir path, so we need to check
  
-        for( const filePath of distFolderContents ) { // looping through all files in dist folder
+        for( const relativePath  of distFolderContents ) { // looping through all files in dist folder
+            const filePath = path.join(distFolderPath, relativePath )
             if(fs.lstatSync(filePath).isDirectory()) continue; // skip directories, only apply on files
 
             console.log(`Uploading ${filePath}`)
  
             // in S3 bucket, all files will be stored in __outputs folder
             const command = new PutObjectCommand({
-                Bucket: '',
+                Bucket: 'codebay-outputs',
                 // Dist contents will be in outputs/PID/
-                Key: `__outputs/${PROJECT_ID}/${filePath}`,
+                Key: `__outputs/${PROJECT_ID}/${relativePath}`,
                 // Body is the actual content we are uplaoding to S3
                 Body: fs.createReadStream(filePath),        
                 // creating a stream for uplaoding

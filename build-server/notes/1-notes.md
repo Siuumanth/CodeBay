@@ -98,6 +98,9 @@ This Node.js script handles the main logic after the repo is cloned.
 
 > ✅ This script makes your deployment portable, platform-independent, and cloud-ready.
 ---
+
+
+
 ## ☁️ 4. AWS Setup – S3 and IAM Configuration
 
 This section covers setting up AWS resources for hosting static files and securing access.
@@ -112,7 +115,6 @@ This section covers setting up AWS resources for hosting static files and securi
 ### 🔓 Step 2: Add a Public Read Policy
 
 This allows public access to the uploaded static files.
-
 Replace `s3name` with your bucket name:
 
 ```json
@@ -123,36 +125,53 @@ Replace `s3name` with your bucket name:
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::s3name/*"
+      "Resource": "arn:aws:s3:::codebay-outputs/*"
+    },
+    {
+      "Sid": "AllowWebAccess",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::codebay-outputs/*"
     }
   ]
 }
 ```
 
+Basically, we are making all contents of the S3 bucket public
+### 📖 **Explanation for CodeBay**
+
+This is a **public read access policy** applied to your S3 bucket `codebay-outputs`
+#### 🔍 What it does:
+
+- **`"Action": "s3:GetObject"`** → allows reading files from the bucket (i.e., GET requests via URL).
+    
+- **`"Principal": "*"`** → allows **anyone on the internet** (anonymous users) to access the files.
+    
+- **`"Resource": "arn:aws:s3:::vercel-clone-outputs/*"`** → applies to **all files inside the bucket**.
+    
+#### 🔁 Why are there two similar blocks?
+
+- Functionally, they’re **identical**.
+- The second one has a `"Sid": "AllowWebAccess"` (statement ID), which is optional and just labels the rule.
+- You can **remove the duplicate** — one is enough.
+
+
+
 ### 👤 Step 3: Create an IAM User with S3 Access
 
 - Go to IAM → Users → Create New User
-    
 - Choose "Programmatic Access"
-    
 - Attach the `AmazonS3FullAccess` policy (or use a tighter scoped custom policy)
-    
 - Save the access key and secret — you'll use these in `script.js`
-    
 
 > 📌 Consider using environment variables or AWS Secrets Manager to manage keys securely.
 
 ---
-
 ## ✅ Summary
 
 - CodeBay runs a **short-lived ECS container** per deployment.
-    
 - Each container builds the user’s repo and uploads static files to an **S3 bucket**.
-    
 - This approach provides strong isolation, reproducibility, and cloud-native scalability.
-    
 - You can extend this setup to support preview URLs, custom domains, or backend deployments using ECS (heavier setup).
     
-
-Let me know if you want to scale this further or handle multi-stage builds or backend APIs.

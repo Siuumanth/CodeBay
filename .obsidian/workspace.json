@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "build-server/notes/1-notes.md",
+                "file": "build-server/notes/2-containers.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "1-notes"
+              "title": "2-containers"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "build-server/notes/1-notes.md",
+                "file": "build-server/notes/2-containers.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 1-notes"
+              "title": "Backlinks for 2-containers"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "build-server/notes/1-notes.md",
+                "file": "build-server/notes/2-containers.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from 1-notes"
+              "title": "Outgoing links from 2-containers"
             }
           },
           {
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "build-server/notes/1-notes.md",
+                "file": "build-server/notes/2-containers.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 1-notes"
+              "title": "Outline of 2-containers"
             }
           }
         ]
@@ -170,10 +170,15 @@
   },
   "active": "910fe0d83d145241",
   "lastOpenFiles": [
+    "build-server/notes/3-test.md",
+    "build-server/notes/2-containers.md",
+    "build-server/notes/Pasted image 20250805220529.png",
+    "Pasted image 20250805220529.png",
+    "build-server/notes/1-notes.md",
+    "package-lock.json",
     "build-server/notes/Pasted image 20250805173104.png",
     "Pasted image 20250805173111.png",
     "Pasted image 20250805173104.png",
-    "build-server/notes/Screenshot 2025-05-27 053445.png",
-    "build-server/notes/1-notes.md"
+    "build-server/notes/Screenshot 2025-05-27 053445.png"
   ]
 }

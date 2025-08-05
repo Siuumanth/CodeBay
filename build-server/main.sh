@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# Get this link from ENV variable
-export GIT_REPOSITORY_URL="$GIT_REPPOSITORY_URL"
-
+# Clone the repo directly using the env var
 git clone "$GIT_REPOSITORY_URL" /home/app/output 
 # clones the repo to this output dir
 
