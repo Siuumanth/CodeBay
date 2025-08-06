@@ -152,7 +152,26 @@ The image has been successfully registered there, now we have to set up so that 
 
 
 
+ISSUES encountered:
+- I had a leading / in my relative file path so the actual S3 bucket file path was like : 
 
+`s3://codebay-outputs/__outputs/p1//home/app/output/dist/index.html`
+which should have been 
+`s3://codebay-outputs/__outputs/p1/index.html`
+- Fixed using the following
+
+- Windows uses \ while unix based use / for paths, so i faced a lot of issues with S3 bucket file paths being wrong and longer then needed. Did this while uploading to fix the issue.
+```js
+// 1. Strip any leading slashes or backslashes:
+let cleaned = relativePath.replace(/^[/\\]+/, '');
+
+// 2. Turn all backslashes into forward-slashes:
+cleaned = cleaned.replace(/\\/g, '/');
+
+// 3. Build your S3 key:
+const Key = `__outputs/${PROJECT_ID}/${cleaned}`;
+
+```
 
 
 

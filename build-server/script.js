@@ -63,12 +63,21 @@ const init = async () => {
             if(fs.lstatSync(filePath).isDirectory()) continue; // skip directories, only apply on files
 
             console.log(`Uploading ${filePath}`)
+
+            // 1. Strip any leading slashes or backslashes:
+            let cleaned = relativePath.replace(/^[/\\]+/, '');
+            
+            // 2. Turn all backslashes into forward-slashes:
+            cleaned = cleaned.replace(/\\/g, '/');   // g is global search 
+            
+            // 3. Build your S3 key Path:
+            const keyPath = `__outputs/${PROJECT_ID}/${cleaned}`;
  
             // in S3 bucket, all files will be stored in __outputs folder
             const command = new PutObjectCommand({
                 Bucket: 'codebay-outputs',
                 // Dist contents will be in outputs/PID/
-                Key: `__outputs/${PROJECT_ID}/${relativePath}`,
+                Key: keyPath,
                 // Body is the actual content we are uplaoding to S3
                 Body: fs.createReadStream(filePath),        
                 // creating a stream for uplaoding
