@@ -243,12 +243,12 @@ Here’s the step-by-step request flow:
 ---
 ## ⚠️ Common Issues to Be Aware Of
 
-|Issue|Cause|Fix|
-|---|---|---|
-|**Browser downloads file**|Wrong `Content-Type` (not `text/html`)|Ensure S3 sets correct MIME type|
-|**404 from S3**|Folder or file doesn't exist|Ensure `${subdomain}/index.html` exists|
-|**Opera GX specific bug**|Very strict on headers or redirects|Test on other browsers or inspect headers|
-|**CORS errors**|Origin headers blocked|Use `changeOrigin: true` in proxy config|
+| Issue                      | Cause                                  | Fix                                       |
+| -------------------------- | -------------------------------------- | ----------------------------------------- |
+| **Browser downloads file** | Wrong `Content-Type` (not `text/html`) | Ensure S3 sets correct MIME type          |
+| **404 from S3**            | Folder or file doesn't exist           | Ensure `${subdomain}/index.html` exists   |
+| **Opera GX specific bug**  | Very strict on headers or redirects    | Test on other browsers or inspect headers |
+| **CORS errors**            | Origin headers blocked                 | Use `changeOrigin: true` in proxy config  |
 
 ---
 
