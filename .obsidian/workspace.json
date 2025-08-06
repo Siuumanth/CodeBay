@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/2-containers.md",
+                "file": "notes/3-Reverse Proxy.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2-containers"
+              "title": "3-Reverse Proxy"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "notes/2-containers.md",
+                "file": "notes/3-Reverse Proxy.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 2-containers"
+              "title": "Backlinks for 3-Reverse Proxy"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "notes/2-containers.md",
+                "file": "notes/3-Reverse Proxy.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from 2-containers"
+              "title": "Outgoing links from 3-Reverse Proxy"
             }
           },
           {
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "notes/2-containers.md",
+                "file": "notes/3-Reverse Proxy.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 2-containers"
+              "title": "Outline of 3-Reverse Proxy"
             }
           }
         ]
@@ -170,6 +170,41 @@
   },
   "active": "e8beae7c6b7a896e",
   "lastOpenFiles": [
-    "notes/3-Mapping.md"
+    "s3-reverse-proxy/node_modules/simple-update-notifier/build/index.js",
+    "s3-reverse-proxy/node_modules/simple-update-notifier/build/index.d.ts",
+    "s3-reverse-proxy/node_modules/simple-update-notifier/build",
+    "s3-reverse-proxy/node_modules/pstree.remy/lib/utils.js",
+    "s3-reverse-proxy/node_modules/pstree.remy/lib/tree.js",
+    "s3-reverse-proxy/node_modules/pstree.remy/lib/index.js",
+    "s3-reverse-proxy/node_modules/pstree.remy/lib",
+    "s3-reverse-proxy/node_modules/pstree.remy/package.json",
+    "s3-reverse-proxy/node_modules/balanced-match/package.json",
+    "s3-reverse-proxy/node_modules/brace-expansion/index.js",
+    "s3-reverse-proxy/node_modules/brace-expansion/package.json",
+    "s3-reverse-proxy/node_modules/touch/README.md",
+    "s3-reverse-proxy/node_modules/minimatch/README.md",
+    "s3-reverse-proxy/node_modules/to-regex-range/README.md",
+    "s3-reverse-proxy/node_modules/is-glob/README.md",
+    "s3-reverse-proxy/node_modules/readdirp/README.md",
+    "s3-reverse-proxy/node_modules/http-errors/node_modules/statuses/README.md",
+    "s3-reverse-proxy/node_modules/http-errors/node_modules/statuses/HISTORY.md",
+    "s3-reverse-proxy/node_modules/wrappy/README.md",
+    "s3-reverse-proxy/node_modules/vary/README.md",
+    "s3-reverse-proxy/node_modules/vary/HISTORY.md",
+    "s3-reverse-proxy/node_modules/unpipe/README.md",
+    "s3-reverse-proxy/node_modules/unpipe/HISTORY.md",
+    "s3-reverse-proxy/node_modules/type-is/README.md",
+    "s3-reverse-proxy/node_modules/type-is/HISTORY.md",
+    "s3-reverse-proxy/node_modules/toidentifier/README.md",
+    "s3-reverse-proxy/node_modules/toidentifier/HISTORY.md",
+    "s3-reverse-proxy/node_modules/statuses/README.md",
+    "s3-reverse-proxy/node_modules/statuses/HISTORY.md",
+    "s3-reverse-proxy/node_modules/side-channel-weakmap/README.md",
+    "s3-reverse-proxy/node_modules/side-channel-weakmap/CHANGELOG.md",
+    "s3-reverse-proxy/node_modules/side-channel-map/README.md",
+    "s3-reverse-proxy/node_modules/side-channel-map/CHANGELOG.md",
+    "s3-reverse-proxy/node_modules/side-channel-list/README.md",
+    "s3-reverse-proxy/node_modules/side-channel-list/CHANGELOG.md",
+    "s3-reverse-proxy/node_modules/side-channel/README.md"
   ]
 }

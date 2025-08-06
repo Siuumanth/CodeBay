@@ -81,7 +81,7 @@ const init = async () => {
                 // Body is the actual content we are uplaoding to S3
                 Body: fs.createReadStream(filePath),        
                 // creating a stream for uplaoding
-                contentType: mime.lookup(filePath)          
+                ContentType: mime.lookup(filePath)          
                 // mime will auto detect file type and send
             })
             
