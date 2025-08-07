@@ -10,6 +10,12 @@ export const useSocket = (channel) => {
   useEffect(() => {
     if (!channel) return;
 
+    // Check if build is already completed
+    const completedBuilds = JSON.parse(localStorage.getItem('completedBuilds') || '{}');
+    if (completedBuilds[channel]) {
+      return; // Don't connect if build is already completed
+    }
+
     // Clean up existing connection
     if (socketRef.current) {
       socketRef.current.disconnect();
@@ -23,9 +29,19 @@ export const useSocket = (channel) => {
     });
 
     socketRef.current.on('message', (message) => {
+      // Parse JSON if it's a string, otherwise use as-is
+      let parsedMessage = message;
+      if (typeof message === 'string') {
+        try {
+          parsedMessage = JSON.parse(message);
+        } catch (e) {
+          parsedMessage = message;
+        }
+      }
+      
       setMessages(prev => [...prev, { 
         id: Date.now() + Math.random(), 
-        content: message, 
+        content: parsedMessage, 
         timestamp: new Date() 
       }]);
     });

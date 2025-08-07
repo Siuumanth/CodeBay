@@ -1,103 +1,93 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createProject } from '../services/api';
-import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Home() {
   const [gitURL, setGitURL] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setError('');
     
     if (!gitURL.trim()) {
       setError('Please enter a Git URL');
       return;
     }
 
-    if (!gitURL.includes('github.com') && !gitURL.includes('gitlab.com') && !gitURL.includes('.git')) {
+    // Basic validation for git URLs
+    const isValidGitUrl = gitURL.includes('github.com') || 
+                         gitURL.includes('gitlab.com') || 
+                         gitURL.includes('.git') ||
+                         gitURL.startsWith('git@');
+
+    if (!isValidGitUrl) {
       setError('Please enter a valid Git repository URL');
       return;
     }
 
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await createProject(gitURL);
-      navigate(`/build/${response.data.projectSlug}`);
-    } catch (err) {
-      setError('Failed to create project. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    // Navigate to configure page with git URL
+    navigate('/configure', { state: { gitURL } });
   };
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <h1 className="text-4xl font-bold text-white mb-4">
           Welcome to CodeBay
         </h1>
-        <p className="text-xl text-gray-600">
+        <p className="text-xl text-gray-400">
           Build, monitor, and deploy your projects with ease
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+      <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
+        <h2 className="text-2xl font-semibold text-white mb-6">
           Start New Build
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="gitURL" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="gitURL" className="block text-sm font-medium text-gray-300 mb-2">
               Git Repository URL
             </label>
             <input
               id="gitURL"
-              type="url"
+              type="text"
               value={gitURL}
-              onChange={(e) => setGitURL(e.target.value)}
-              placeholder="https://github.com/username/repository.git"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={loading}
+              onChange={(e) => {
+                setGitURL(e.target.value);
+                if (error) setError('');
+              }}
+              placeholder="https://github.com/username/repository"
+              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-600 text-sm">{error}</p>
+            <div className="bg-red-900/50 border border-red-500 rounded-lg p-3">
+              <p className="text-red-400 text-sm">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
-            disabled={loading || !gitURL.trim()}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            disabled={!gitURL.trim()}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? (
-              <>
-                <LoadingSpinner size="sm" />
-                <span>Starting Build...</span>
-              </>
-            ) : (
-              <span>Start Build</span>
-            )}
+            Continue to Build Settings
           </button>
         </form>
       </div>
 
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="font-medium text-blue-900 mb-2">How it works:</h3>
-        <ul className="text-blue-800 text-sm space-y-1">
+      <div className="mt-8 bg-blue-900/30 border border-blue-500/30 rounded-lg p-4">
+        <h3 className="font-medium text-blue-300 mb-2">How it works:</h3>
+        <ul className="text-blue-200 text-sm space-y-1">
           <li>1. Enter your Git repository URL</li>
-          <li>2. We'll clone and build your project in a secure container</li>
-          <li>3. Watch real-time logs as your build progresses</li>
-          <li>4. Get your deployed URL when complete</li>
+          <li>2. Configure build settings and environment variables</li>
+          <li>3. We'll clone and build your project in a secure container</li>
+          <li>4. Watch real-time logs as your build progresses</li>
+          <li>5. Get your deployed URL when complete</li>
         </ul>
       </div>
     </div>
