@@ -1,5 +1,12 @@
+const Redis =  require("ioredis")
+subscriber = new Redis()
+console.log(Object.getOwnPropertyNames(Object.getPrototypeOf(subscriber)));
+
+
+/*
  require('dotenv').config()
  console.log(process.env.IAM_SECRET_KEY)
+*/
 
 
 /*const fs = require("fs")

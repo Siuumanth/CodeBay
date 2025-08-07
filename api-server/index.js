@@ -6,14 +6,19 @@ require('dotenv').config()
 
 const Redis =  require("ioredis")
 const { Server } = require("socket.io");
+let projectSlug;
 
 const subscriber = new Redis(process.env.AIVEN_REDIS_URL)
-
 // Socket server
 const io = new Server({ cors: '*'});
 
+// Tis runs once per client when first connection happens
+// this is from the frontend user
 io.on('connection', (socket) => {
-    // event name is subscribe in from container
+     // This socket represents *this* client
+    // So all event handlers for this client go here
+
+    // event name is subscribe in from container, channel is data sent
     socket.on('subscribe', channel => {
         socket.join(channel);
         // node js instance subscribes to redis 
@@ -23,7 +28,7 @@ io.on('connection', (socket) => {
 
 
 // continuously listns for socket connections
-io.listen(9001, () => console.log(`Socket server Running..${9001}`))
+io.listen(9002, () => console.log(`Socket server Running..${9002}`))
 
 const app = express()
 const PORT = 9000
@@ -49,7 +54,7 @@ app.use(express.json())
 // from here, we will run the task on ECS with the specific configs
 app.post('/project', async (req, res) => {
     const{ gitURL } = req.body
-    const projectSlug = generateSlug();
+    projectSlug = generateSlug();
 
     // Spin the container when a URL is recieved
     // Give proper creds, same as what we set up manually in aws
@@ -84,6 +89,8 @@ app.post('/project', async (req, res) => {
         }
     })
 
+    await initRedisSubscriber();
+
   try {
         const response = await ecsClient.send(command);
         console.log('Task started:');
@@ -107,15 +114,38 @@ app.post('/project', async (req, res) => {
 })
 
 
+// This listens from the docker container
 async function initRedisSubscriber() {
-    console.log('Subscribing to redis');
-    subscriber.pSubscribe('logs:*');
-    subscriber.on('pmessage', (pattern, channel, message) =>{
-        io.to(channel).emit('message', message)
-    })
+    const channel = `logs:${projectSlug}`;
+    console.log(`Subscribing to Redis channel: ${channel}`);
+
+    // subscribe to that channel
+    await subscriber.subscribe(channel); // use exact match
+
+    // whenver a message is recieved, send ws msg to user
+    subscriber.on('message', (channel, message) => {
+        io.to(channel).emit('message', message);
+    });
+    // basically translates to:
+    // Whenever we recieve a logs message from redis, emit to user
 
 }
 
-initRedisSubscriber();
+
+
+/*
+async function initRedisSubscriber() {
+    console.log('Subscribing to redis');
+    subscriber.subscribe('logs:*');
+    subscriber.on('pmessage', (pattern, channel, message) =>{
+        io.to(channel).emit('message', message)
+    })
+    // basically translates to:
+    // Whenever we recieve a logs message from redis, emit to user
+
+}
+*/
+
+
 
 app.listen(PORT, () => console.log(`API server Running..${PORT}`))

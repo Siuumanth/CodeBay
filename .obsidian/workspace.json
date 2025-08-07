@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "8a3a96115e44048f",
@@ -170,17 +171,22 @@
   },
   "active": "e8beae7c6b7a896e",
   "lastOpenFiles": [
-    "api-server/node_modules/@types/node/stream/web.d.ts",
-    "api-server/node_modules/@types/node/stream/promises.d.ts",
-    "api-server/node_modules/@types/node/stream/consumers.d.ts",
-    "api-server/node_modules/@types/node/stream",
-    "api-server/node_modules/@types/node/readline/promises.d.ts",
-    "api-server/node_modules/@types/node/readline",
-    "api-server/node_modules/@types/node/fs/promises.d.ts",
-    "api-server/node_modules/@types/node/fs",
-    "api-server/node_modules/@types/node/dns/promises.d.ts",
-    "api-server/node_modules/@types/node/dns",
-    "api-server/node_modules/@types/node/compatibility/iterators.d.ts",
+    "api-server/node_modules/simple-update-notifier/package.json",
+    "api-server/node_modules/pstree.remy/lib/utils.js",
+    "api-server/node_modules/pstree.remy/lib/tree.js",
+    "api-server/node_modules/pstree.remy/lib/index.js",
+    "api-server/node_modules/pstree.remy/lib",
+    "api-server/node_modules/pstree.remy/package.json",
+    "api-server/node_modules/balanced-match/package.json",
+    "api-server/node_modules/concat-map/index.js",
+    "api-server/node_modules/brace-expansion/index.js",
+    "api-server/node_modules/brace-expansion/package.json",
+    "api-server/node_modules/minimatch/package.json",
+    "api-server/node_modules/nodemon/README.md",
+    "api-server/node_modules/picomatch/CHANGELOG.md",
+    "api-server/node_modules/supports-color/readme.md",
+    "api-server/node_modules/glob-parent/README.md",
+    "api-server/node_modules/is-extglob/README.md",
     "api-server/node_modules/@ioredis/commands/README.md",
     "api-server/node_modules/standard-as-callback/README.md",
     "api-server/node_modules/redis-parser/changelog.md",
@@ -200,11 +206,6 @@
     "api-server/node_modules/dotenv/CHANGELOG.md",
     "api-server/node_modules/@smithy/types/README.md",
     "api-server/node_modules/@aws-sdk/client-ecs/README.md",
-    "api-server/node_modules/fast-xml-parser/CHANGELOG.md",
-    "api-server/node_modules/@aws-crypto/util/README.md",
-    "api-server/node_modules/@aws-crypto/supports-web-crypto/CHANGELOG.md",
-    "api-server/node_modules/@aws-sdk/xml-builder/README.md",
-    "api-server/node_modules/@aws-sdk/credential-provider-web-identity/README.md",
-    "api-server/node_modules/tslib/SECURITY.md"
+    "api-server/node_modules/fast-xml-parser/CHANGELOG.md"
   ]
 }
