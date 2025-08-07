@@ -4,6 +4,26 @@ const { generateSlug } = require('random-word-slugs')
 const { ECSClient, RunTaskCommand, LaunchType } = require('@aws-sdk/client-ecs')
 require('dotenv').config()                
 
+const Redis =  require("ioredis")
+const { Server } = require("socket.io");
+
+const subscriber = new Redis(process.env.AIVEN_REDIS_URL)
+
+// Socket server
+const io = new Server({ cors: '*'});
+
+io.on('connection', (socket) => {
+    // event name is subscribe in from container
+    socket.on('subscribe', channel => {
+        socket.join(channel);
+        // node js instance subscribes to redis 
+        socket.emit('message', `Joined ${channel}`)
+    });
+});
+
+
+// continuously listns for socket connections
+io.listen(9001, () => console.log(`Socket server Running..${9001}`))
 
 const app = express()
 const PORT = 9000
@@ -87,6 +107,15 @@ app.post('/project', async (req, res) => {
 })
 
 
+async function initRedisSubscriber() {
+    console.log('Subscribing to redis');
+    subscriber.pSubscribe('logs:*');
+    subscriber.on('pmessage', (pattern, channel, message) =>{
+        io.to(channel).emit('message', message)
+    })
 
+}
+
+initRedisSubscriber();
 
 app.listen(PORT, () => console.log(`API server Running..${PORT}`))

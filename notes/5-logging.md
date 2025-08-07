@@ -1,0 +1,1 @@
+We will be using Aiven Valkey for a hosted redis database

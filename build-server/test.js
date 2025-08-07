@@ -1,5 +1,5 @@
-// require('dotenv').config()
-// console.log(process.env.IAM_SECRET_KEY)
+require('dotenv').config()
+console.log(process.env.AIVEN_REDIS_URL)
 
 
 /*const fs = require("fs")
@@ -8,6 +8,7 @@ const distFolderContents = fs.readdirSync("D:/code/DSA with CPP", {recursive: tr
 
 console.log(distFolderContents)*/
 
+/*
 
 const { exec } = require('child_process') 
 // to run shell commands like 'npm install' or 'npm run build'
