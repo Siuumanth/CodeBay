@@ -3,6 +3,7 @@ const express = require('express')
 const { generateSlug } = require('random-word-slugs')
 const { ECSClient, RunTaskCommand, LaunchType } = require('@aws-sdk/client-ecs')
 require('dotenv').config()                
+const cors = require('cors') // Add this
 
 const Redis =  require("ioredis")
 const { Server } = require("socket.io");
@@ -32,6 +33,16 @@ io.listen(9002, () => console.log(`Socket server Running..${9002}`))
 
 const app = express()
 const PORT = 9000
+
+
+// Add CORS middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // Your Vite dev server
+  credentials: true
+}))
+
+app.use(express.json())
+
 
 // Set up ECS client
 const ecsClient = new ECSClient({
@@ -125,27 +136,12 @@ async function initRedisSubscriber() {
     // whenver a message is recieved, send ws msg to user
     subscriber.on('message', (channel, message) => {
         io.to(channel).emit('message', message);
+        //io.to(channel).emit('message', channel)
     });
     // basically translates to:
     // Whenever we recieve a logs message from redis, emit to user
 
 }
-
-
-
-/*
-async function initRedisSubscriber() {
-    console.log('Subscribing to redis');
-    subscriber.subscribe('logs:*');
-    subscriber.on('pmessage', (pattern, channel, message) =>{
-        io.to(channel).emit('message', message)
-    })
-    // basically translates to:
-    // Whenever we recieve a logs message from redis, emit to user
-
-}
-*/
-
 
 
 app.listen(PORT, () => console.log(`API server Running..${PORT}`))
