@@ -1,100 +1,146 @@
-const Redis =  require("ioredis")
-subscriber = new Redis()
-console.log(Object.getOwnPropertyNames(Object.getPrototypeOf(subscriber)));
-
-
-/*
- require('dotenv').config()
- console.log(process.env.IAM_SECRET_KEY)
-*/
-
-
-/*const fs = require("fs")
-
-const distFolderContents = fs.readdirSync("D:/code/DSA with CPP", {recursive: true})
-
-console.log(distFolderContents)*/
-
-
-
-
-
-
-
-/*
-
-
-
-
-
-
-
-
-
-const { exec } = require('child_process') 
-// to run shell commands like 'npm install' or 'npm run build'
-const path = require('path')          
-// to handle file and folder paths safely across OS
-const fs = require('fs')                  
-// to read files and directories from the output folder
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
-// to upload built files to AWS S3
-const mime = require('mime-types')        
-// to detect correct MIME types for S3 uploads
-
+const express = require('express')
+// To generate random ids
+const { generateSlug } = require('random-word-slugs')
+const { ECSClient, RunTaskCommand, LaunchType } = require('@aws-sdk/client-ecs')
 require('dotenv').config()                
+const cors = require('cors') // Add this
+
+const Redis =  require("ioredis")
+const { Server } = require("socket.io");
+
+const subscriber = new Redis(process.env.AIVEN_REDIS_URL)
+// Socket server
+const io = new Server({ cors: '*'});
+
+// Tis runs once per client when first connection happens
+// this is from the frontend user
+io.on('connection', (socket) => {
+     // This socket represents *this* client
+    // So all event handlers for this client go here
+
+    // event name is subscribe in from container, channel is data sent
+    socket.on('subscribe', channel => {
+        socket.join(channel);
+        // node js instance subscribes to redis 
+        socket.emit('message', `Joined ${channel}`)
+    });
+});
 
 
+// continuously listns for socket connections
+io.listen(9002, () => console.log(`Socket server Running..${9002}`))
 
-const init = async () => {
-    const outDirPath = path.join(__dirname, "output") // dist files
+const app = express()
+const PORT = 9000
 
-    // all the source code goes to output folder
-    // After building, the compiled code goes to dist folder
-    // We have to upload this to S3
 
-    // executing build commands
-    
-    const funca = async () => {
+// Add CORS middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // Your Vite dev server
+  credentials: true
+}))
 
-        const distFolderPath = path.join(__dirname, 'output', 'dist')
-        console.log(distFolderPath);
+app.use(express.json())
 
-        
-        // Reading dist folder, and storing all files in an array recursively
-        const distFolderContents = fs.readdirSync(distFolderPath, {recursive: true})
 
- 
-        for( const relativePath  of distFolderContents ) { // looping through all files in dist folder
+// Set up ECS client
+const ecsClient = new ECSClient({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.IAM_ACCESS_KEY,
+        secretAccessKey: process.env.IAM_SECRET_KEY
+    }
+})
 
-            // 1. Strip any leading slashes or backslashes:
-            let cleaned = relativePath.replace(/^[/\\]+/, '');
-            
-            // 2. Turn all backslashes into forward-slashes:
-            cleaned = cleaned.replace(/\\/g, '/');
-            
-            // 3. Build your S3 key:
-            const Key = `__outputs/p1/${cleaned}`;
+// Cluster and task details
 
-            const filePath = path.join(distFolderPath, relativePath )
-            if(fs.lstatSync(filePath).isDirectory()) continue; // skip directories, only apply on files
-            console.log(`Rel file path is  ${Key}`)
+const config = {
+    CLUSTER: 'arn:aws:ecs:ap-south-1:448049830963:cluster/builder-cluster3',
+    TASK: 'arn:aws:ecs:ap-south-1:448049830963:task-definition/builder-task2'
+}
 
-           // console.log(`Uploading ${filePath}`)
- 
-            // in S3 bucket, all files will be stored in __outputs folder
-           // console.log(`Uploaded`)
-        };
+app.use(express.json())
 
-        console.log('DONE MAN....')
+// from here, we will run the task on ECS with the specific configs
+app.post('/project', async (req, res) => {
+    const{ gitURL } = req.body
+    projectSlug = generateSlug();
+
+    // Spin the container when a URL is recieved
+    // Give proper creds, same as what we set up manually in aws
+    const command = new RunTaskCommand({
+        cluster: config.CLUSTER,
+        taskDefinition: config.TASK,
+        launchType: 'FARGATE',
+        count: 1,
+        networkConfiguration: {
+            awsvpcConfiguration: {
+                assignPublicIp: 'ENABLED',
+                // Available in network configurations
+                subnets: ['subnet-0c56cbfc98a17e3fe', 'subnet-0d2b19d68e1ca4a03','subnet-05ebfc44dde98d299'],
+                securityGroups : ['sg-055397065bb925dae']
+            }
+        },
+        overrides: {
+            containerOverrides: [
+            {
+                name: 'builder-image',
+                // ENV variables
+                environment: [
+                    {
+                        name: 'GIT_REPOSITORY_URL', value: gitURL
+                    },
+                    {
+                        name: 'PROJECT_ID', value: projectSlug
+                    }
+                ]
+            }
+        ]
+        }
+    })
+
+    await initRedisSubscriber();
+
+  try {
+        const response = await ecsClient.send(command);
+        console.log('Task started:');
+
+        return res.json({
+            status: 'queued',
+            data: {
+                projectSlug,
+                url: `http://${projectSlug}.localhost:8000`
+            }
+        });
+
+    } catch (err) {
+        console.error('Failed to run ECS task:', err);
+        return res.status(500).json({
+            error: 'Failed to start ECS task',
+            details: err.message
+        });
     }
 
-    funca();
+})
+
+
+// This listens from the docker container
+async function initRedisSubscriber() {
+    const channel = `logs:${projectSlug}`;
+    console.log(`Subscribing to Redis channel: ${channel}`);
+
+    // subscribe to that channel
+    await subscriber.subscribe(channel); // use exact match
+
+    // whenver a message is recieved, send ws msg to user
+    subscriber.on('message', (channel, message) => {
+        io.to(channel).emit('message', message);
+        //io.to(channel).emit('message', channel)
+    });
+    // basically translates to:
+    // Whenever we recieve a logs message from redis, emit to user
 
 }
 
-init()
 
-
-fs.createReadStream(filePath) lets you upload large files to S3 efficiently by streaming them in chunks instead of loading the whole file into memory.
-*/
+app.listen(PORT, () => console.log(`API server Running..${PORT}`))

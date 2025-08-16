@@ -9,8 +9,13 @@ const Redis =  require("ioredis")
 const { Server } = require("socket.io");
 
 const subscriber = new Redis(process.env.AIVEN_REDIS_URL)
+
+const app = express()
+const PORT = process.env.PORT || 9000
+const server = http.createServer(app); // Express + HTTP server
+
 // Socket server
-const io = new Server({ cors: '*'});
+const io = new Server(server, { cors: { origin: '*' } });
 
 // Tis runs once per client when first connection happens
 // this is from the frontend user
@@ -28,18 +33,14 @@ io.on('connection', (socket) => {
 
 
 // continuously listns for socket connections
-io.listen(9002, () => console.log(`Socket server Running..${9002}`))
-
-const app = express()
-const PORT = 9000
+//io.listen(9002, () => console.log(`Socket server Running..${9002}`))
 
 
 // Add CORS middleware
 app.use(cors({
-  origin: 'http://localhost:5173', // Your Vite dev server
+  origin: 'http://localhost:5173', 
   credentials: true
 }))
-
 app.use(express.json())
 
 
@@ -56,7 +57,7 @@ const ecsClient = new ECSClient({
 
 const config = {
     CLUSTER: 'arn:aws:ecs:ap-south-1:448049830963:cluster/builder-cluster3',
-    TASK: 'arn:aws:ecs:ap-south-1:448049830963:task-definition/builder-task2'
+    TASK: 'arn:aws:ecs:ap-south-1:448049830963:task-definition/builder-task'
 }
 
 app.use(express.json())
@@ -143,4 +144,7 @@ async function initRedisSubscriber() {
 }
 
 
-app.listen(PORT, () => console.log(`API server Running..${PORT}`))
+
+
+
+server.listen(PORT, () => console.log(`API server Running..${PORT}`))
