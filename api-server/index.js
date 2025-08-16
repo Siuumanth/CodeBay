@@ -4,6 +4,7 @@ const { generateSlug } = require('random-word-slugs')
 const { ECSClient, RunTaskCommand, LaunchType } = require('@aws-sdk/client-ecs')
 require('dotenv').config()                
 const cors = require('cors') // Add this
+const {PrismaClient} = require('@prisma/client')
 
 const Redis =  require("ioredis")
 const { Server } = require("socket.io");
@@ -62,10 +63,45 @@ const config = {
 
 app.use(express.json())
 
+app.post('api/project', async (req, res) => {
+    const {name, gitURL} = req.body
+
+    const project = await prisma.project.create({
+        data:{
+            name,
+            gitURL, 
+            subdomain: generateSlug()
+        }
+    })
+
+    return res.json({ status: 'success', data: project })
+
+})
+
+
+
 // from here, we will run the task on ECS with the specific configs
-app.post('/project', async (req, res) => {
-    const{ gitURL } = req.body
-    projectSlug = generateSlug();
+app.post('api/deploy', async (req, res) => {
+    // Project Id is basically projecct slug
+    const{ projectId } = req.body
+
+    // get project data from database
+    const project = await prisma.project.findUnique({ where: {
+        id: projectId
+    }})
+
+    if(!project) {
+        return res.status(404).json({ error: 'Project not found' })
+    }
+
+    // Chck if there is no running deployment in DB, and deploy
+    const deployment = await prisma.deployment.create({
+        data: {
+            project: { connect: { id: project.id }},
+            status: 'QUEUED'
+        }
+    })
+    
 
     // Spin the container when a URL is recieved
     // Give proper creds, same as what we set up manually in aws
@@ -89,10 +125,13 @@ app.post('/project', async (req, res) => {
                 // ENV variables
                 environment: [
                     {
-                        name: 'GIT_REPOSITORY_URL', value: gitURL
+                        name: 'GIT_REPOSITORY_URL', value: project.gitURL
                     },
                     {
-                        name: 'PROJECT_ID', value: projectSlug
+                        name: 'PROJECT_ID', value: projectId
+                    },
+                    {
+                        name: 'DEPLOYMENT_ID', value: deployment.id
                     }
                 ]
             }

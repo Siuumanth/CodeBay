@@ -24,6 +24,9 @@ const s3Client = new S3Client({
 })
 
 const PROJECT_ID = process.env.PROJECT_ID
+// api-server had injected these into the env
+const DEPLOYMENT_ID = process.env.DEPLOYMENT_ID
+
 
 const publishLog = async(log) => {
     // logs project Id is our channel name 
@@ -106,6 +109,11 @@ const init = async () => {
 
         console.log('DONE MAN....')
         publishLog('Done...')
+
+        await publisher.quit()
+        s3Client.destroy()
+        process.exit(0)
+
     })
 
 }
