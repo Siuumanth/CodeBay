@@ -1,4 +1,6 @@
-# CodeBay - Full-Stack Deployment Platform
+# CodeBay - Deployment Platform
+
+<Project is incomplete, and most of the readme rn is random n ai generated, so bear with it :) >
 
 CodeBay is a modern web application that allows developers to deploy their projects from Git repositories with real-time build monitoring and automatic deployment.
 
