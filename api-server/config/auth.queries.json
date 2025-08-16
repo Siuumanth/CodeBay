@@ -1,0 +1,7 @@
+{
+  "createUser": "INSERT INTO users (username, email, password) VALUES (?, ?, ?);",
+  "findUserByEmail": "SELECT * FROM users WHERE email = ?;",
+  "findUserById": "SELECT id, username, email FROM users WHERE id = ?;",
+  "updateRefreshToken": "UPDATE users SET refresh_token = ? WHERE id = ?;",
+  "deleteRefreshToken": "UPDATE users SET refresh_token = NULL WHERE id = ?;"
+}

@@ -7,7 +7,6 @@ const cors = require('cors') // Add this
 
 const Redis =  require("ioredis")
 const { Server } = require("socket.io");
-let projectSlug;
 
 const subscriber = new Redis(process.env.AIVEN_REDIS_URL)
 // Socket server
