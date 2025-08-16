@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { createProject } from '../services/api';
+import { startDeploy } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CopyButton from '../components/CopyButton';
 import Toast from '../components/Toast';
@@ -41,15 +41,24 @@ export default function Configure() {
     setLoading(true);
 
     try {
-      const response = await createProject(gitURL, envVars);
+      // Filter out empty environment variables
+      const filteredEnvVars = envVars.filter(env => env.key.trim() && env.value.trim());
+      
+      const deployData = {
+        gitURL,
+        envVars: filteredEnvVars
+      };
+
+      const response = await startDeploy(deployData);
       showToast('Build started successfully!', 'success');
+      
       setTimeout(() => {
-        navigate(`/build/${response.data.projectSlug}`, { 
+        navigate(`/build/${response.projectSlug}`, { 
           state: { gitURL, startTime: Date.now() }
         });
       }, 1000);
     } catch (err) {
-      showToast('Failed to create project. Please try again.', 'error');
+      showToast(err.message || 'Failed to start build. Please try again.', 'error');
       console.error(err);
     } finally {
       setLoading(false);

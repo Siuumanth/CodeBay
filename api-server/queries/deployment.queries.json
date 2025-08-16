@@ -1,0 +1,9 @@
+{
+  "findProjectBySlug": "SELECT * FROM projects WHERE id = $1",
+  "createDeployment": "INSERT INTO deployments(projectId, status) VALUES ($1, $2) RETURNING *",
+  "updateDeploymentStatus": "UPDATE deployments SET status = $1 WHERE id = $2",
+  "findDeploymentById": "SELECT * FROM deployments WHERE id = $1",
+  "insertLogs": "INSERT INTO log_events(deploymentId, logs) VALUES ($1, $2) RETURNING",
+  "createProject": "INSERT INTO projects (id, createdBy, gitURL) VALUES ($1, $2, $3) RETURNING *",
+  "deleteProject": "DELETE FROM projects WHERE id = $1"
+}

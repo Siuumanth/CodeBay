@@ -1,22 +1,55 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import BuildDetail from './pages/BuildDetail';
 import Configure from './pages/Configure';
 import History from './pages/History';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Layout>
+    <AuthProvider>
+      <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/build/:slug" element={<BuildDetail />} />
-          <Route path="/configure" element={<Configure />} />
-          <Route path="/history" element={<History />} />
+          {/* Public routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* Protected routes */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout>
+                <Home />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/build/:slug" element={
+            <ProtectedRoute>
+              <Layout>
+                <BuildDetail />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/configure" element={
+            <ProtectedRoute>
+              <Layout>
+                <Configure />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/history" element={
+            <ProtectedRoute>
+              <Layout>
+                <History />
+              </Layout>
+            </ProtectedRoute>
+          } />
         </Routes>
-      </Layout>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

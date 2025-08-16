@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Home() {
   const [gitURL, setGitURL] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,9 +38,16 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-white mb-4">
           Welcome to CodeBay
         </h1>
-        <p className="text-xl text-gray-400">
-          Build, monitor, and deploy your projects with ease
-        </p>
+        {user ? (
+          <p className="text-xl text-gray-400">
+            Welcome back, <span className="text-blue-400">{user.username || 'Developer'}</span>! 
+            Ready to build something amazing?
+          </p>
+        ) : (
+          <p className="text-xl text-gray-400">
+            Build, monitor, and deploy your projects with ease
+          </p>
+        )}
       </div>
 
       <div className="bg-gray-800 rounded-lg border border-gray-700 p-6">
@@ -90,6 +99,23 @@ export default function Home() {
           <li>5. Get your deployed URL when complete</li>
         </ul>
       </div>
+
+      {user && (
+        <div className="mt-6 bg-gray-800 rounded-lg border border-gray-700 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-white font-medium mb-1">Quick Actions</h3>
+              <p className="text-gray-400 text-sm">Manage your existing projects</p>
+            </div>
+            <button
+              onClick={() => navigate('/history')}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors font-medium"
+            >
+              View History
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

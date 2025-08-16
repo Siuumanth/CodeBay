@@ -1,11 +1,10 @@
-// Auth middleware
+// AUTH middleware
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export const verifyJWT = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // "Bearer <token>"
+  const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", ""); // read from cookie
 
   if (!token) return res.status(401).json({ message: "Access denied" });
 

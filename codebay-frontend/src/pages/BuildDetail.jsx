@@ -70,7 +70,8 @@ export default function BuildDetail() {
     }
   };
 
-  const hostedURL = `https://${slug}.codebay.site`;
+  // Use the correct domain from the backend
+  const hostedURL = `https://${slug}.codebay.xyz`;
 
   const getAllLogsText = () => {
     return messages.map(m => {

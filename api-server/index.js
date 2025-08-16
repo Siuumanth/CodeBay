@@ -1,13 +1,28 @@
-const express = require('express')
+import express from 'express';
 // To generate random ids
-const { generateSlug } = require('random-word-slugs')
-const { ECSClient, RunTaskCommand, LaunchType } = require('@aws-sdk/client-ecs')
-require('dotenv').config()                
-const cors = require('cors') // Add this
-const {PrismaClient} = require('@prisma/client')
+import { generateSlug } from 'random-word-slugs';
+import { ECSClient, RunTaskCommand, LaunchType } from '@aws-sdk/client-ecs';
+import dotenv from 'dotenv';
+dotenv.config();
+import fs from 'fs';
+import http from 'http';
+import cors from 'cors'; 
+import path from 'path';
+import pool from "./config/db.js";
+import cookieParser from "cookie-parser";
 
-const Redis =  require("ioredis")
-const { Server } = require("socket.io");
+const filePath = path.resolve('./queries/deployment.queries.json');
+const queries = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+import { verifyJWT } from "./middlewares/auth.mw.js";
+
+
+import Redis from "ioredis";
+import { Server } from "socket.io";
+
+// routers
+import authRouter from "./routes/auth.routes.js";
+import projectRouter from "./routes/project.routes.js";
+import deployRouter from "./routes/deploy.routes.js";
 
 const subscriber = new Redis(process.env.AIVEN_REDIS_URL)
 
@@ -43,6 +58,12 @@ app.use(cors({
   credentials: true
 }))
 app.use(express.json())
+app.use(cookieParser());
+
+
+app.use("/api/auth", authRouter);
+app.use("/api/projects", projectRouter);
+app.use("/api/deployments", deployRouter);
 
 
 // Set up ECS client
@@ -53,56 +74,78 @@ const ecsClient = new ECSClient({
         secretAccessKey: process.env.IAM_SECRET_KEY
     }
 })
-
 // Cluster and task details
-
 const config = {
     CLUSTER: 'arn:aws:ecs:ap-south-1:448049830963:cluster/builder-cluster3',
-    TASK: 'arn:aws:ecs:ap-south-1:448049830963:task-definition/builder-task'
+    TASK: 'arn:aws:ecs:ap-south-1:448049830963:task-definition/builder-task2'
 }
 
-app.use(express.json())
 
-app.post('api/project', async (req, res) => {
-    const {name, gitURL} = req.body
-
-    const project = await prisma.project.create({
-        data:{
-            name,
-            gitURL, 
-            subdomain: generateSlug()
-        }
-    })
-
-    return res.json({ status: 'success', data: project })
-
-})
-
-
-
+// Step 1: start deployment
 // from here, we will run the task on ECS with the specific configs
-app.post('api/deploy', async (req, res) => {
-    // Project Id is basically projecct slug
-    const{ projectId } = req.body
+app.post('/api/deploy', verifyJWT, async (req, res) => {
+     const userId = req.user.id; // or req.user._id depending on your model
 
-    // get project data from database
-    const project = await prisma.project.findUnique({ where: {
-        id: projectId
-    }})
+    // Project Id is basically project slug
+    const{ gitURL } = req.body
+    let projectSlug = req.body.projectSlug
 
-    if(!project) {
-        return res.status(404).json({ error: 'Project not found' })
+    if( !gitURL) {
+        return res.status(400).json({
+            error: 'Missing projectSlug or gitURL'
+        })
     }
 
-    // Chck if there is no running deployment in DB, and deploy
-    const deployment = await prisma.deployment.create({
-        data: {
-            project: { connect: { id: project.id }},
-            status: 'QUEUED'
-        }
-    })
-    
+    // if project slug exists, then check for existing project
+    if(projectSlug){
+        const existingProj = await pool.query(queries.findProjectBySlug, [projectSlug]);
 
+        if(existingProj.rows.length > 0) {
+            return res.status(400).json({
+                error: 'Project already exists, please choose any other name'
+            })
+        }
+
+        if (!/^[a-z-]+$/.test(projectSlug)) {
+            return res.status(400).json({
+                error: 'Project slug can only contain alphabets and -'
+            })
+        }
+    }
+    else{
+        projectSlug = generateSlug();
+    }
+    console.log(projectSlug)
+
+    // Create a project first, then deployment due to forien key constraints
+    const newProject = await pool.query(queries.createProject, [
+          projectSlug, // subdomain
+          userId,
+          gitURL
+    ]);
+
+   // console.log(newProject)
+
+    if(newProject.rowCount === 0) {
+        return res.status(500).json({
+            error: 'Failed to create'
+        })
+    }
+
+    // Adding a new deployment record    
+    const newDeployment = await pool.query(queries.createDeployment, [projectSlug, "q"]);
+    if(newDeployment.rowCount === 0) {
+        return res.status(500).json({
+            error: 'Failed to create'
+        })
+    }
+   // console.log(newDeployment)
+
+    const deploymentId = newDeployment.rows[0].id
+
+    try {
+    
+    // If deploy succeeds, we will pass to projects
     // Spin the container when a URL is recieved
     // Give proper creds, same as what we set up manually in aws
     const command = new RunTaskCommand({
@@ -125,47 +168,65 @@ app.post('api/deploy', async (req, res) => {
                 // ENV variables
                 environment: [
                     {
-                        name: 'GIT_REPOSITORY_URL', value: project.gitURL
+                        name: 'GIT_REPOSITORY_URL', value: gitURL
                     },
                     {
-                        name: 'PROJECT_ID', value: projectId
+                        name: 'PROJECT_ID', value: projectSlug
                     },
-                    {
-                        name: 'DEPLOYMENT_ID', value: deployment.id
-                    }
                 ]
             }
         ]
         }
     })
 
-    await initRedisSubscriber();
-
-  try {
+    await initRedisSubscriber(projectSlug);
+  
+    // sending deploy command
         const response = await ecsClient.send(command);
-        console.log('Task started:');
+        console.log('Deployment task started:', projectSlug);
 
-        return res.json({
-            status: 'queued',
-            data: {
-                projectSlug,
-                url: `http://${projectSlug}.localhost:8000`
-            }
+        // Respond immediately to frontend
+        res.json({
+          status: 'queued',
+          projectSlug,
+          url: `http://${projectSlug}.codebay.xyz`,
+          deploymentId: deploymentId
         });
+
+      // For example, when container finishes, insert into projects
+          subscriber.on('message', async (channel, message) => {
+        if (message.includes('Done...')) { // your container success message
+        // Insert project into projects table
+
+          // Update deployment status
+          await pool.query(queries.updateDeploymentStatus, ['ready', deploymentId]);
+        }
+        if (message.includes('Error')) {
+          await pool.query(queries.updateDeploymentStatus, ['fail', deploymentId]);
+        }
+      });
+    // socket functino ends 
 
     } catch (err) {
-        console.error('Failed to run ECS task:', err);
-        return res.status(500).json({
-            error: 'Failed to start ECS task',
-            details: err.message
-        });
+        // delete project if fail
+      await pool.query(queries.deleteProject, [projectSlug]);
+      console.error('Failed to run ECS task:', err);
+      await pool.query(queries.updateDeploymentStatus, ['fail', deploymentId]);
+      res.status(500).json({ error: 'Failed to start deployment', details: err.message });
     }
-
 })
+
+// After all deployment is done , frontend will save logs 
+app.post('/api/logs', async (req, res) => {
+    const {deploymentId, logs} = req.body;
+    await pool.query(queries.insertLogs, [deploymentId, logs]);
+    res.json({
+        status: 'success', message: 'Logs saved successfully'});
+})    
 
 
 // This listens from the docker container
-async function initRedisSubscriber() {
+async function initRedisSubscriber(projectSlug) {
     const channel = `logs:${projectSlug}`;
     console.log(`Subscribing to Redis channel: ${channel}`);
 
@@ -181,9 +242,6 @@ async function initRedisSubscriber() {
     // Whenever we recieve a logs message from redis, emit to user
 
 }
-
-
-
 
 
 server.listen(PORT, () => console.log(`API server Running..${PORT}`))
