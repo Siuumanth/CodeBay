@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../hooks/useToast';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Login() {
@@ -15,7 +14,6 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { showToast } = useToast();
   
   // Get the page user was trying to access before login
   const from = location.state?.from?.pathname || '/';
@@ -35,7 +33,7 @@ export default function Login() {
 
     try {
       await login(formData);
-      showToast('Login successful!', 'success');
+      alert('Login successful!');
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.');

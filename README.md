@@ -10,6 +10,7 @@ CodeBay is a modern web application that allows developers to deploy their proje
 - 🐳 **Container Deployment** - AWS ECS-based container deployment
 - 📱 **Modern UI** - Beautiful, responsive interface built with React and Tailwind CSS
 - 📈 **Build History** - Track all your deployments and their status
+- 🌐 **Custom Domains** - Choose your own project subdomain
 
 ## Project Structure
 
@@ -56,12 +57,6 @@ PORT=9000
 NODE_ENV=development
 ```
 
-### Frontend (codebay-frontend/.env)
-```env
-VITE_API_URL=http://localhost:9000
-VITE_SOCKET_URL=http://localhost:9000
-```
-
 ## Quick Start
 
 ### 1. Backend Setup
@@ -73,8 +68,13 @@ cd api-server
 npm install
 
 # Set up environment variables
-cp .env.example .env
-# Edit .env with your actual values
+cp env.template .env
+
+# Edit .env with your actual values:
+# - Database credentials
+# - JWT secret
+# - Redis URL
+# - AWS credentials
 
 # Start the server
 npm run dev
@@ -153,6 +153,9 @@ CREATE TABLE log_events (
 - `GET /api/deployments/getall` - Get all user deployments
 - `GET /api/deployments/:id` - Get deployment with logs
 - `POST /api/deploy` - Start new deployment
+
+### Logs
+- `POST /api/logs` - Save build logs
 
 ## Development
 

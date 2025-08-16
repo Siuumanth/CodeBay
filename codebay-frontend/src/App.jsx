@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import BuildDetail from './pages/BuildDetail';
 import Configure from './pages/Configure';
 import History from './pages/History';
+import BuildHistoryDetail from './pages/BuildHistoryDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -44,6 +45,13 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <History />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/history/:id" element={
+            <ProtectedRoute>
+              <Layout>
+                <BuildHistoryDetail />
               </Layout>
             </ProtectedRoute>
           } />

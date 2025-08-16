@@ -5,10 +5,39 @@ import { useAuth } from '../contexts/AuthContext';
 export default function Home() {
   const [gitURL, setGitURL] = useState('');
   const [error, setError] = useState('');
+  const [validating, setValidating] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const handleSubmit = (e) => {
+  const validateGitURL = async (url) => {
+    try {
+      let webURL = url.trim();
+  
+      // Convert SSH to HTTPS
+      if (webURL.startsWith("git@github.com:")) {
+        webURL = webURL.replace("git@github.com:", "https://github.com/");
+      } else if (webURL.startsWith("git@gitlab.com:")) {
+        webURL = webURL.replace("git@gitlab.com:", "https://gitlab.com/");
+      }
+  
+      // Drop trailing .git
+      if (webURL.endsWith(".git")) {
+        webURL = webURL.slice(0, -4);
+      }
+  
+      // Just check basic URL structure
+      const validHost =
+        webURL.startsWith("https://github.com/") ||
+        webURL.startsWith("https://gitlab.com/");
+  
+      return validHost;
+    } catch (err) {
+      return false;
+    }
+  };
+  
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
@@ -28,6 +57,13 @@ export default function Home() {
       return;
     }
 
+    // Validate that the repository is accessible
+    const isValidRepo = await validateGitURL(gitURL);
+    if (!isValidRepo) {
+      setError('Repository not accessible. Please check if the URL is correct or make the repository public.');
+      return;
+    }
+
     // Navigate to configure page with git URL
     navigate('/configure', { state: { gitURL } });
   };
@@ -35,6 +71,9 @@ export default function Home() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
+        <div className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <span className="text-white font-bold text-2xl">🚀</span>
+        </div>
         <h1 className="text-4xl font-bold text-white mb-4">
           Welcome to CodeBay
         </h1>
@@ -81,10 +120,16 @@ export default function Home() {
 
           <button
             type="submit"
-            disabled={!gitURL.trim()}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+            disabled={!gitURL.trim() || validating}
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center space-x-2 transition-colors"
           >
-            Continue to Build Settings
+            {validating ? (
+              <>
+                <span>Validating Repository...</span>
+              </>
+            ) : (
+              <span>Continue to Build Settings</span>
+            )}
           </button>
         </form>
       </div>
@@ -93,7 +138,7 @@ export default function Home() {
         <h3 className="font-medium text-blue-300 mb-2">How it works:</h3>
         <ul className="text-blue-200 text-sm space-y-1">
           <li>1. Enter your Git repository URL</li>
-          <li>2. Configure build settings and environment variables</li>
+          <li>2. Configure build settings and choose a custom domain</li>
           <li>3. We'll clone and build your project in a secure container</li>
           <li>4. Watch real-time logs as your build progresses</li>
           <li>5. Get your deployed URL when complete</li>

@@ -24,7 +24,15 @@ import authRouter from "./routes/auth.routes.js";
 import projectRouter from "./routes/project.routes.js";
 import deployRouter from "./routes/deploy.routes.js";
 
-const subscriber = new Redis(process.env.AIVEN_REDIS_URL)
+let subscriber;
+
+try {
+    subscriber = new Redis(process.env.AIVEN_REDIS_URL);
+} catch (error) {
+    console.error(error);
+    process.exit(1); // don’t forget `process.` 
+}
+
 
 const app = express()
 const PORT = process.env.PORT || 9000
@@ -84,7 +92,7 @@ const config = {
 // Step 1: start deployment
 // from here, we will run the task on ECS with the specific configs
 app.post('/api/deploy', verifyJWT, async (req, res) => {
-     const userId = req.user.id; // or req.user._id depending on your model
+    const userId = req.user.id; // or req.user._id depending on your model
 
     // Project Id is basically project slug
     const{ gitURL } = req.body

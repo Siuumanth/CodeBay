@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../hooks/useToast';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Register() {
@@ -16,7 +15,6 @@ export default function Register() {
   
   const { register } = useAuth();
   const navigate = useNavigate();
-  const { showToast } = useToast();
 
   const handleChange = (e) => {
     setFormData({
@@ -58,7 +56,7 @@ export default function Register() {
     try {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
-      showToast('Registration successful!', 'success');
+      alert('Registration successful!');
       navigate('/');
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');

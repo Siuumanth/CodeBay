@@ -5,30 +5,87 @@ import LogMessage from '../components/LogMessage';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CopyButton from '../components/CopyButton';
 import BuildTimer from '../components/BuildTimer';
-import Toast from '../components/Toast';
-import { useToast } from '../hooks/useToast';
+import { saveLogs } from '../services/api';
 
 export default function BuildDetail() {
   const { slug } = useParams();
   const location = useLocation();
-  const { gitURL, startTime } = location.state || {};
-  const { toast, showToast } = useToast();
+  const { gitURL, startTime, deploymentId } = location.state || {};
   const { messages, connected } = useSocket(`logs:${slug}`);
   const [buildStatus, setBuildStatus] = useState('running');
   const [buildStartTime] = useState(startTime || Date.now());
+  const [allLogs, setAllLogs] = useState('');
+  const [lastMessageTime, setLastMessageTime] = useState(Date.now());
   const logsEndRef = useRef(null);
+  const inactivityTimerRef = useRef(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Check if build is complete based on log messages
+  // Build logs as a single string
   useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    let logContent = '';
+    const logsString = messages.map(m => {
+      if (typeof m.content === 'string') return m.content;
+      return m.content.log || m.content.logs || JSON.stringify(m.content);
+    }).join('\n');
+    setAllLogs(logsString);
+  }, [messages]);
+
+  // Update last message time and reset inactivity timer
+  useEffect(() => {
+    if (messages.length > 0) {
+      setLastMessageTime(Date.now());
+      
+      // Clear existing timer
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+      }
+      
+      // Set new inactivity timer (1 minute)
+      inactivityTimerRef.current = setTimeout(() => {
+        handleBuildError('Build timed out - no activity for 1 minute');
+      }, 60000); // 1 minute
+    }
+  }, [messages]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleBuildError = async (errorMessage) => {
+    setBuildStatus('failed');
+    alert(errorMessage);
     
-    if (lastMessage) {
+    // Save logs to API
+    if (deploymentId && allLogs) {
+      try {
+        await saveLogs(deploymentId, allLogs);
+        console.log('Logs saved successfully');
+      } catch (err) {
+        console.error('Failed to save logs:', err);
+      }
+    }
+    
+    // Store completion in localStorage
+    const completedBuilds = JSON.parse(localStorage.getItem('completedBuilds') || '{}');
+    completedBuilds[`logs:${slug}`] = true;
+    localStorage.setItem('completedBuilds', JSON.stringify(completedBuilds));
+  };
+
+  // Check if build is complete and save logs
+  useEffect(() => {
+    const checkBuildStatus = async () => {
+      const lastMessage = messages[messages.length - 1];
+      if (!lastMessage) return;
+      
+      let logContent = '';
       if (typeof lastMessage.content === 'string') {
         logContent = lastMessage.content;
       } else if (lastMessage.content.log) {
@@ -36,23 +93,36 @@ export default function BuildDetail() {
       } else if (lastMessage.content.logs) {
         logContent = lastMessage.content.logs;
       }
-    }
 
-    if (logContent.toLowerCase().includes('done') || logContent.toLowerCase().includes('build complete')) {
-      setBuildStatus('completed');
-      showToast('Build completed successfully!', 'success');
-      
-      // Store completion in localStorage
-      const completedBuilds = JSON.parse(localStorage.getItem('completedBuilds') || '{}');
-      completedBuilds[`logs:${slug}`] = true;
-      localStorage.setItem('completedBuilds', JSON.stringify(completedBuilds));
-    } else if (logContent.toLowerCase().includes('error') || 
-               logContent.toLowerCase().includes('failed') ||
-               logContent.toLowerCase().includes('build failed')) {
-      setBuildStatus('failed');
-      showToast('Build failed. Check logs for details.', 'error');
-    }
-  }, [messages, slug, showToast]);
+      // Check for errors
+      if (logContent.toLowerCase().includes('error')) {
+        handleBuildError('Build failed due to an error in the logs');
+        return;
+      }
+
+      if (logContent.toLowerCase().includes('done...')) {
+        setBuildStatus('completed');
+        alert('Build completed successfully!');
+        
+        // Save logs to API
+        if (deploymentId && allLogs) {
+          try {
+            await saveLogs(deploymentId, allLogs);
+            console.log('Logs saved successfully');
+          } catch (err) {
+            console.error('Failed to save logs:', err);
+          }
+        }
+        
+        // Store completion in localStorage
+        const completedBuilds = JSON.parse(localStorage.getItem('completedBuilds') || '{}');
+        completedBuilds[`logs:${slug}`] = true;
+        localStorage.setItem('completedBuilds', JSON.stringify(completedBuilds));
+      }
+    };
+
+    checkBuildStatus();
+  }, [messages, slug, deploymentId, allLogs]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -70,20 +140,23 @@ export default function BuildDetail() {
     }
   };
 
-  // Use the correct domain from the backend
   const hostedURL = `https://${slug}.codebay.xyz`;
-
-  const getAllLogsText = () => {
-    return messages.map(m => {
-      if (typeof m.content === 'string') return m.content;
-      return m.content.log || m.content.logs || JSON.stringify(m.content);
-    }).join('\n');
-  };
 
   return (
     <div className="max-w-6xl mx-auto">
-      <Toast toast={toast} onClose={() => {}} />
-      
+      {/* Warning Message */}
+      <div className="mb-6 bg-yellow-900/50 border border-yellow-500/50 rounded-lg p-4">
+        <div className="flex items-center space-x-2">
+          <span className="text-yellow-400 text-xl">⚠️</span>
+          <div>
+            <h3 className="font-bold text-yellow-300">Important:</h3>
+            <p className="text-yellow-200 text-sm">
+              <strong>Do not refresh the screen or exit this page</strong> - you will lose your build progress!
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-6">
         <Link 
           to="/" 
@@ -161,7 +234,7 @@ export default function BuildDetail() {
             Live Build Logs
           </h2>
           {messages.length > 0 && (
-            <CopyButton text={getAllLogsText()} />
+            <CopyButton text={allLogs} />
           )}
         </div>
         

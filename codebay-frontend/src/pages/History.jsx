@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getDeployments, getProjects } from '../services/api';
-import { useToast } from '../hooks/useToast';
 import LoadingSpinner from '../components/LoadingSpinner';
 import CopyButton from '../components/CopyButton';
 
@@ -10,7 +9,7 @@ export default function History() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { showToast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,14 +24,14 @@ export default function History() {
         setProjects(projectsData);
       } catch (err) {
         setError(err.message || 'Failed to fetch build history');
-        showToast('Failed to load build history', 'error');
+        alert('Failed to load build history');
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [showToast]);
+  }, []);
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -151,6 +150,8 @@ export default function History() {
     );
   }
 
+  console.log(deployments)
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
@@ -161,14 +162,17 @@ export default function History() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {deployments.map((deployment) => {
+        {deployments.map((deployment) => {  // responsible for looping over deployments 
           const project = getProjectByDeployment(deployment.projectId);
           const hostedURL = `https://${project?.slug || 'unknown'}.codebay.xyz`;
           
           return (
-            <div key={deployment.id} className="bg-gray-800 rounded-lg border border-gray-700 p-4 hover:border-gray-600 transition-colors">
+            <div 
+              key={deployment.id} 
+              className="bg-gray-800 rounded-lg border border-gray-700 p-4 hover:border-gray-600 transition-colors cursor-pointer"
+              onClick={() => navigate(`/history/${deployment.id}`)}
+            >
               <div className="flex items-center justify-between mb-3">
-                <span className="font-mono text-sm text-gray-300">#{deployment.id}</span>
                 <span className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(deployment.status)}`}>
                   {getStatusText(deployment.status)}
                 </span>
@@ -178,19 +182,14 @@ export default function History() {
                 {project && (
                   <div>
                     <p className="text-white font-medium text-sm">Project: {project.slug}</p>
-                    <p className="text-gray-400 text-xs font-mono break-all">{project.gitUrl}</p>
+                    <p className="text-gray-400 text-xs font-mono break-all">{deployment.projectid}</p>
                   </div>
                 )}
                 
                 <p className="text-gray-400 text-xs">
-                  Created: {formatDate(deployment.createdAt)}
+                  Created: {formatDate(deployment.createdat)}
                 </p>
-                
-                {deployment.updatedAt && deployment.updatedAt !== deployment.createdAt && (
-                  <p className="text-gray-400 text-xs">
-                    Updated: {formatDate(deployment.updatedAt)}
-                  </p>
-                )}
+               
               </div>
               
               <div className="flex items-center justify-between">
@@ -206,19 +205,13 @@ export default function History() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 text-xs transition-colors"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     Visit →
                   </a>
                 )}
                 
-                {deployment.status === 'queued' && (
-                  <Link
-                    to={`/build/${project?.slug || deployment.id}`}
-                    className="text-blue-400 hover:text-blue-300 text-xs transition-colors"
-                  >
-                    View Logs →
-                  </Link>
-                )}
+                <span className="text-blue-400 text-xs">Click to view details →</span>
               </div>
             </div>
           );

@@ -8,7 +8,7 @@ const getAuthHeaders = () => {
     ...(token && { 'Authorization': `Bearer ${token}` })
   };
 };
-
+/*
 // Helper function to handle API responses
 const handleResponse = async (response) => {
   if (!response.ok) {
@@ -17,6 +17,19 @@ const handleResponse = async (response) => {
   }
   return response.json();
 };
+*/
+
+const handleResponse = async (response) => {
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.error || `HTTP error! status: ${response.status}`);
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+  return data;
+};
+
 
 // Auth API functions
 export const register = async (userData) => {
@@ -129,19 +142,4 @@ export const saveLogs = async (deploymentId, logs) => {
   });
   
   return handleResponse(response);
-};
-
-// Legacy function for backward compatibility
-export const createProject = async (gitURL, envVars = []) => {
-  // Filter out empty environment variables
-  const filteredEnvVars = envVars.filter(env => env.key.trim() && env.value.trim());
-  
-  // Convert to the format expected by the deploy endpoint
-  const deployData = {
-    gitURL,
-    projectSlug: undefined, // Let backend generate slug
-    envVars: filteredEnvVars
-  };
-  
-  return startDeploy(deployData);
 };
