@@ -24,14 +24,24 @@ export default function BuildDetail() {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Build logs as a single string
-  useEffect(() => {
-    const logsString = messages.map(m => {
-      if (typeof m.content === 'string') return m.content;
-      return m.content.log || m.content.logs || JSON.stringify(m.content);
-    }).join('\n');
-    setAllLogs(logsString);
-  }, [messages]);
+  // Build logs as a single string with timestamps
+useEffect(() => {
+  const logsString = messages.map(m => {
+    // Extract the log content
+    let logContent = '';
+    if (typeof m.content === 'string') {
+      logContent = m.content;
+    } else {
+      logContent = m.content.log || m.content.logs || JSON.stringify(m.content);
+    }
+    
+    // Add timestamp to each log line
+    const timestamp = new Date().toISOString();
+    return `[${timestamp}] ${logContent}`;
+  }).join('\n');
+  
+  setAllLogs(logsString);
+}, [messages]);
 
   // Update last message time and reset inactivity timer
   useEffect(() => {

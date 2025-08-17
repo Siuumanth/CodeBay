@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = "3h";
+const JWT_EXPIRES_IN = "6h";
 
 // Helper: issue cookie and return token
 const issueJWT = (res, payload) => {

@@ -203,7 +203,7 @@ app.post('/api/deploy', verifyJWT, async (req, res) => {
 
       // For example, when container finishes, insert into projects
           subscriber.on('message', async (channel, message) => {
-        if (message.includes('Done...')) { // your container success message
+        if (message.includes('Done...')) {   // build done 
         // Insert project into projects table
 
           // Update deployment status

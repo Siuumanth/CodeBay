@@ -1,5 +1,6 @@
 import CopyButton from './CopyButton';
 
+// This component renders the log message properly from the object given my useSocket, it formats the time and make it proper
 export default function LogMessage({ message }) {
   const formatTime = (timestamp) => {
     return timestamp.toLocaleTimeString('en-US', { 

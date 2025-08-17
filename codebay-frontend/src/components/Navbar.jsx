@@ -14,19 +14,18 @@ export default function Navbar() {
   };
   
   return (
-    <nav className="bg-gray-800 border-b border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+    <nav className="bg-gray-800 border-b border-gray-700 h-16">
+      <div className="max-w-7xl mx-auto px-4 h-full flex justify-between items-center">
+        {/* Logo Section - Similar to YouTube */}
+        <Link to="/" className="flex items-center hover:opacity-90 transition-opacity">
           <img 
-      src="../assets/logo.png" 
-      alt="Logo" 
-      className="w-full h-full object-contain"
-    />
-          </div>
-          <span className="text-xl font-bold text-white">CodeBay</span>
+            src="/codebay.png"
+            alt="CodeBay"
+            className="h-18 w-auto max-w-[140px]"
+          />
         </Link>
-        
+
+        {/* Navigation Links */}
         <div className="flex items-center space-x-6">
           {isAuthenticated ? (
             <>
