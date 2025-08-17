@@ -96,7 +96,7 @@ export default function Configure() {
               <p className="text-gray-500 text-sm mt-1">
                 Only lowercase letters and hyphens allowed. Your site will be available at: 
                 <span className="font-mono text-blue-400 ml-1">
-                  {customSlug ? `https://${customSlug}.codebay.xyz` : 'https://[auto-generated].codebay.xyz'}
+                  {customSlug ? `https://${customSlug}.codebay.sbs` : 'https://[auto-generated].codebay.sbs'}
                 </span>
               </p>
             </div>

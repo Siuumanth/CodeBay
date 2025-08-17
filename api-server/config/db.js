@@ -15,7 +15,7 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
    ssl: {
     rejectUnauthorized: true, // ensures server certificate is verified
-    ca: fs.readFileSync('./ca.pem').toString(), // path to your CA cert
+    ca: fs.readFileSync('/etc/secrets/ca.pem').toString(), // path to your CA cert
   },
 });
 

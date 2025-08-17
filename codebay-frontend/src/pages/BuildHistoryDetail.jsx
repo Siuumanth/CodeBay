@@ -111,7 +111,7 @@ export default function BuildHistoryDetail() {
     );
   }
 
-  const hostedURL = `https://${project?.slug || 'unknown'}.codebay.xyz`;
+  const hostedURL = `https://${project?.slug || 'unknown'}.codebay.sbs`;
 
   return (
     <div className="max-w-6xl mx-auto">

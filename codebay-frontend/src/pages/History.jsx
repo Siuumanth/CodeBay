@@ -164,7 +164,7 @@ export default function History() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {deployments.map((deployment) => {  // responsible for looping over deployments 
           const project = getProjectByDeployment(deployment.projectId);
-          const hostedURL = `https://${project?.slug || 'unknown'}.codebay.xyz`;
+          const hostedURL = `https://${project?.slug || 'unknown'}.codebay.sbs`;
           
           return (
             <div 
@@ -192,26 +192,28 @@ export default function History() {
                
               </div>
               
-              <div className="flex items-center justify-between">
+              <div className="space-y-3">
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-400 text-xs">URL:</span>
                   <span className="text-gray-300 text-xs font-mono">{hostedURL}</span>
                   <CopyButton text={hostedURL} />
                 </div>
                 
-                {deployment.status === 'ready' && (
-                  <a
-                    href={hostedURL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 text-xs transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Visit →
-                  </a>
-                )}
-                
-                <span className="text-blue-400 text-xs">Click to view details →</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-blue-400 text-xs">Click to view details →</span>
+                  
+                  {deployment.status === 'ready' && (
+                    <a
+                      href={hostedURL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 text-xs transition-colors bg-blue-900/30 px-2 py-1 rounded"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Visit Site →
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           );

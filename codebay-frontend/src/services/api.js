@@ -22,6 +22,15 @@ const handleResponse = async (response) => {
 const handleResponse = async (response) => {
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
+    // Handle JWT authentication errors
+    if (response.status === 401 || response.status === 403) {
+      // Clear token and redirect to login
+      localStorage.removeItem('token');
+      alert('Your session has expired. Please log in again.');
+      window.location.href = '/login';
+      return;
+    }
+    
     const error = new Error(data.error || `HTTP error! status: ${response.status}`);
     error.status = response.status;
     error.data = data;

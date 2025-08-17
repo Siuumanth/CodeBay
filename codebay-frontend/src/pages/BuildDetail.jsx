@@ -71,6 +71,13 @@ useEffect(() => {
 
   const handleBuildError = async (errorMessage) => {
     setBuildStatus('failed');
+    
+    // Clear inactivity timer since build has failed
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+    
     alert(errorMessage);
     
     // Save logs to API
@@ -112,6 +119,13 @@ useEffect(() => {
 
       if (logContent.toLowerCase().includes('done...')) {
         setBuildStatus('completed');
+        
+        // Clear inactivity timer since build is complete
+        if (inactivityTimerRef.current) {
+          clearTimeout(inactivityTimerRef.current);
+          inactivityTimerRef.current = null;
+        }
+        
         alert('Build completed successfully!');
         
         // Save logs to API
@@ -150,7 +164,7 @@ useEffect(() => {
     }
   };
 
-  const hostedURL = `https://${slug}.codebay.xyz`;
+  const hostedURL = `https://${slug}.codebay.sbs`;
 
   return (
     <div className="max-w-6xl mx-auto">

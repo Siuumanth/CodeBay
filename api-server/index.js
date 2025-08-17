@@ -197,7 +197,7 @@ app.post('/api/deploy', verifyJWT, async (req, res) => {
         res.json({
           status: 'queued',
           projectSlug,
-          url: `http://${projectSlug}.codebay.xyz`,
+          url: `http://${projectSlug}.codebay.sbs`,
           deploymentId: deploymentId
         });
 

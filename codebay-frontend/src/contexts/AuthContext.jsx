@@ -22,13 +22,19 @@ export const AuthProvider = ({ children }) => {
         // Check if we have a token in localStorage
         const token = localStorage.getItem('token');
         if (token) {
-          // You could verify the token here if needed
-          // For now, we'll assume the token is valid
-          setUser({ token });
+          // Also check if we have user data stored
+          const userData = localStorage.getItem('userData');
+          if (userData) {
+            setUser(JSON.parse(userData));
+          } else {
+            // Fallback to just token if no user data
+            setUser({ token });
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
         localStorage.removeItem('token');
+        localStorage.removeItem('userData');
       } finally {
         setLoading(false);
       }
@@ -41,9 +47,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await loginAPI(credentials);
       
-      // Store token in localStorage
+      // Store token and user data in localStorage
       if (response.token) {
         localStorage.setItem('token', response.token);
+      }
+      if (response.user) {
+        localStorage.setItem('userData', JSON.stringify(response.user));
       }
       
       setUser(response.user);
@@ -57,9 +66,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await registerAPI(userData);
       
-      // Store token in localStorage
+      // Store token and user data in localStorage
       if (response.token) {
         localStorage.setItem('token', response.token);
+      }
+      if (response.user) {
+        localStorage.setItem('userData', JSON.stringify(response.user));
       }
       
       setUser(response.user);
@@ -77,6 +89,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // Clear local state regardless of API call success
       localStorage.removeItem('token');
+      localStorage.removeItem('userData');
       setUser(null);
     }
   };

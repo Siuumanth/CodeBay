@@ -1,13 +1,17 @@
 const express = require('express')
 const httpProxy = require('http-proxy') // this is for building reverse proxy
+const dotenv = require('dotenv').config()
 
 const app = express()
-const PORT = 8000   // Running reverse proxy on 8000
+const PORT = process.env.PORT || 8000   // Running reverse proxy on 8000
 
 const BASE_PATH = 'https://codebay-outputs.s3.ap-south-1.amazonaws.com/__outputs'   // S3 bucket folder link
 
 // Typical S3 static file URL is like:
 // https://codebay-outputs.s3.ap-south-1.amazonaws.com/__outputs/p1/index.html
+
+// our new base URL of codebay is codebay.sbs
+// So project URl will be like project.codebay.sbs
 
 const proxy = httpProxy.createProxy()
 
@@ -31,7 +35,7 @@ app.use((req, res) => {
         changeOrigin: true // Change origin header to match target
     })
 
-    console.log(`Path resolved from ${url} to ${resolvesTo}`)
+   //  console.log(`Path resolved from ${url} to ${resolvesTo}`)
 })
 
 app.listen(PORT, () => console.log(`Reverse Proxy Running..${PORT}`))
