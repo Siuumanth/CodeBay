@@ -13,6 +13,13 @@ const BASE_PATH = 'https://codebay-outputs.s3.ap-south-1.amazonaws.com/__outputs
 // our new base URL of codebay is codebay.sbs
 // So project URl will be like project.codebay.sbs
 
+
+// test request to see if the domain works
+app.get('/test', (req, res) => {
+    res.send('Website is working HEHE ok')
+})
+// its important that we add th etest first 
+
 const proxy = httpProxy.createProxy()
 
 // Main proxy handler
@@ -36,11 +43,6 @@ app.use((req, res) => {
     })
 
    //  console.log(`Path resolved from ${url} to ${resolvesTo}`)
-})
-
-// test request to see if the domain works
-app.get('/test', (req, res) => {
-    res.send('Website is working HEHE ok')
 })
 
 
