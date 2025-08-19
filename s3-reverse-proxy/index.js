@@ -38,6 +38,12 @@ app.use((req, res) => {
    //  console.log(`Path resolved from ${url} to ${resolvesTo}`)
 })
 
+// test request to see if the domain works
+app.get('/test', (req, res) => {
+    res.send('Website is working HEHE ok')
+})
+
+
 app.listen(PORT, () => console.log(`Reverse Proxy Running..${PORT}`))
 
 

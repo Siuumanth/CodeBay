@@ -1,6 +1,11 @@
-const BASE_URL = "http://localhost:9000";
-const API_BASE_URL = "http://localhost:9000";
-const SOCKET_URL = "http://localhost:9000";
+// const BASE_URL = "http://localhost:9000";
+// const API_BASE_URL = "http://localhost:9000";
+// const SOCKET_URL = "http://localhost:9000";
+
+const BASE_URL = "https://codebay-1.onrender.com";
+const API_BASE_URL = "https://codebay-1.onrender.com";
+const SOCKET_URL = "https://codebay-1.onrender.com";
+
 
 const API_ENDPOINTS = {
   // Auth
