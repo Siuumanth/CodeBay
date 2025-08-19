@@ -33,6 +33,39 @@ try {
     process.exit(1); // don’t forget `process.` 
 }
 
+// We are initiialisng just 1 global listener for redis, this will listen forever and handle all messages
+
+// whenver a message is recieved, send ws msg to user
+subscriber.on('message', async (channel, message) => {
+//  console.log(`[Redis][${channel}] ${message}`);
+
+  // Broadcast to frontend clients
+  io.to(channel).emit('message', message);
+
+  // Check if build finished → update DB
+  if (message.includes('Done...')) {
+    const slug = channel.split(':')[1]; // extract projectSlug
+    const result = await pool.query(
+      `SELECT id FROM deployments WHERE projectid=$1 ORDER BY createdat DESC LIMIT 1`,
+      [slug]
+    );
+    if (result.rows.length) {
+      await pool.query(queries.updateDeploymentStatus, ['ready', result.rows[0].id]);
+    }
+  }
+
+  if (message.includes('Error')) {
+    const slug = channel.split(':')[1];
+    const result = await pool.query(
+      `SELECT id FROM deployments WHERE projectid=$1 ORDER BY createdat DESC LIMIT 1`,
+      [slug]
+    );
+    if (result.rows.length) {
+      await pool.query(queries.updateDeploymentStatus, ['fail', result.rows[0].id]);
+    }
+  }
+});
+
 
 const app = express()
 const PORT = process.env.PORT || 9000
@@ -102,6 +135,12 @@ app.post('/api/deploy', verifyJWT, async (req, res) => {
     // Project Id is basically project slug
     const{ gitURL } = req.body
     let projectSlug = req.body.projectSlug
+
+    let {startDir} = req.body;
+
+    if(!startDir){
+        startDir = ''
+    }
 
     if( !gitURL) {
         return res.status(400).json({
@@ -186,6 +225,9 @@ app.post('/api/deploy', verifyJWT, async (req, res) => {
                     {
                         name: 'PROJECT_ID', value: projectSlug
                     },
+                    {
+                        name: 'START_DIR', value: startDir
+                    }
                 ]
             }
         ]
@@ -206,19 +248,19 @@ app.post('/api/deploy', verifyJWT, async (req, res) => {
           deploymentId: deploymentId
         });
 
-      // For example, when container finishes, insert into projects
-          subscriber.on('message', async (channel, message) => {
-        if (message.includes('Done...')) {   // build done 
-        // Insert project into projects table
+    //   // For example, when container finishes, insert into projects
+    //       subscriber.on('message', async (channel, message) => {
+    //     if (message.includes('Done...')) {   // build done 
+    //     // Insert project into projects table
 
-          // Update deployment status
-          await pool.query(queries.updateDeploymentStatus, ['ready', deploymentId]);
-        }
-        if (message.includes('Error')) {
-          await pool.query(queries.updateDeploymentStatus, ['fail', deploymentId]);
-        }
-      });
-    // socket functino ends 
+    //       // Update deployment status
+    //       await pool.query(queries.updateDeploymentStatus, ['ready', deploymentId]);
+    //     }
+    //     if (message.includes('Error')) {
+    //       await pool.query(queries.updateDeploymentStatus, ['fail', deploymentId]);
+    //     }
+    //   });
+    // // socket functino ends 
 
     } catch (err) {
         // delete project if fail
@@ -238,6 +280,8 @@ app.post('/api/logs', async (req, res) => {
 })    
 
 
+
+
 // This listens from the docker container
 async function initRedisSubscriber(projectSlug) {
     const channel = `logs:${projectSlug}`;
@@ -245,15 +289,6 @@ async function initRedisSubscriber(projectSlug) {
 
     // subscribe to that channel
     await subscriber.subscribe(channel); // use exact match
-
-    // whenver a message is recieved, send ws msg to user
-    subscriber.on('message', (channel, message) => {
-        io.to(channel).emit('message', message);
-        //io.to(channel).emit('message', channel)
-    });
-    // basically translates to:
-    // Whenever we recieve a logs message from redis, emit to user
-
 }
 
 

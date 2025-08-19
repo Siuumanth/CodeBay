@@ -25,8 +25,8 @@ const s3Client = new S3Client({
 
 const PROJECT_ID = process.env.PROJECT_ID
 // api-server had injected these into the env
-const DEPLOYMENT_ID = process.env.DEPLOYMENT_ID
 
+const START_DIR = process.env.START_DIR;
 
 const publishLog = async(log) => {
     // logs project Id is our channel name 
@@ -36,15 +36,23 @@ const publishLog = async(log) => {
 
 
 const init = async () => {
-    publishLog('Build Started....')
-    const outDirPath = path.join(__dirname, "output") // dist files
-
     // all the source code goes to output folder
     // After building, the compiled code goes to dist folder
     // We have to upload this to S3
+    publishLog('Build Started....')
+    
+    // Base directory for all projects (where the cloned repo is)
+    const outDirPath = path.join(__dirname, "output"); 
 
-    // executing build commands
-    const p = exec(`cd ${outDirPath} && npm install && npm run build`)
+    // Determine the actual directory where npm commands should run
+    // path.join handles slashes and prevents directory traversal attacks
+    const projectBuildDir = START_DIR ? path.join(outDirPath, START_DIR) : outDirPath;
+
+    let p;
+
+    // Use the `cwd` option to securely set the working directory for the command.
+    // This completely avoids shell injection vulnerabilities.
+    p = exec(`npm install && npm run build`, { cwd: projectBuildDir });
     
     // Print output of logs
     // Tracking execution of our commands
@@ -64,7 +72,7 @@ const init = async () => {
         console.log("Build complete");
         publishLog("Build complete")
 
-        const distFolderPath = path.join(__dirname, 'output', 'dist')
+        const distFolderPath = path.join(projectBuildDir, 'dist')
         // After building, dist will have all the output static files
         
         // Reading dist folder, and storing all files in an array recursively

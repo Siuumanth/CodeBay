@@ -6,6 +6,14 @@ import fs from "fs";
 dotenv.config();
 const { Pool } = pkg;
 
+let caFile;
+
+try{
+  caFile = fs.readFileSync('/etc/secrets/ca.pem').toString();
+} catch(e) {
+  caFile = fs.readFileSync('ca.pem').toString()
+}
+
 // Create a connection pool
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -15,7 +23,7 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
    ssl: {
     rejectUnauthorized: true, // ensures server certificate is verified
-    ca: fs.readFileSync('/etc/secrets/ca.pem').toString(), // path to your CA cert
+    ca: caFile, // path to your CA cert
   },
 });
 

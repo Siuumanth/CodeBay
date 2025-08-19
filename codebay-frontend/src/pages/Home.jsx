@@ -134,15 +134,22 @@ export default function Home() {
       </div>
 
       <div className="mt-8 bg-blue-900/30 border border-blue-500/30 rounded-lg p-4">
-        <h3 className="font-medium text-blue-300 mb-2">How it works:</h3>
-        <ul className="text-blue-200 text-sm space-y-1">
-          <li>1. Enter your Git repository URL</li>
-          <li>2. Configure build settings and choose a custom domain</li>
-          <li>3. We'll clone and build your project in a secure container</li>
-          <li>4. Watch real-time logs as your build progresses</li>
-          <li>5. Get your deployed URL when complete</li>
-        </ul>
-      </div>
+ <h3 className="font-medium text-blue-300 mb-2">How it works:</h3>
+ <ul className="text-blue-200 text-sm space-y-1">
+   <li>1. Enter your Git repository URL</li>
+   <li>2. Configure build settings, type a custom subdomain</li>
+   <li>3. Select a start folder inside your repo</li>
+   <li>4. We'll clone and build your project in a secure container</li>
+   <li>5. Watch real-time logs as your build progresses</li>
+   <li>6. Get your deployed URL when complete</li>
+ </ul>
+ 
+ <div className="mt-3 pt-3 border-t border-blue-500/20">
+   <p className="text-blue-200 text-sm">
+     <strong className="text-blue-300">Note:</strong> You can deploy only React projects for now.
+   </p>
+ </div>
+</div>
 
       {user && (
         <div className="mt-6 bg-gray-800 rounded-lg border border-gray-700 p-4">

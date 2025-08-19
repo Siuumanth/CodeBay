@@ -45,7 +45,7 @@ useEffect(() => {
 
   // Update last message time and reset inactivity timer
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 0 && buildStatus === 'running') {
       setLastMessageTime(Date.now());
       
       // Clear existing timer
@@ -53,12 +53,20 @@ useEffect(() => {
         clearTimeout(inactivityTimerRef.current);
       }
       
-      // Set new inactivity timer (1 minute)
+      // Set new inactivity timer (1 minute) only if build is still running
       inactivityTimerRef.current = setTimeout(() => {
         handleBuildError('Build timed out - no activity for 1 minute');
       }, 60000); // 1 minute
     }
-  }, [messages]);
+  }, [messages, buildStatus]);
+
+  // Clear timer when build status changes from running
+  useEffect(() => {
+    if (buildStatus !== 'running' && inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+  }, [buildStatus]);
 
   // Cleanup timer on unmount
   useEffect(() => {

@@ -10,6 +10,7 @@ export default function Configure() {
   const { gitURL } = location.state || {};
   
   const [customSlug, setCustomSlug] = useState('');
+  const [startDir, setStartDir] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Redirect if no gitURL
@@ -27,6 +28,11 @@ export default function Configure() {
         gitURL,
         projectSlug: customSlug.trim() || undefined,
       };
+
+      // Only add startDir if a value is entered
+      if (startDir.trim()) {
+        deployData.startDir = startDir.trim();
+      }
   
       const response = await startDeploy(deployData);
   
@@ -77,28 +83,65 @@ export default function Configure() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Project Settings</h3>
-            <p className="text-gray-400 text-sm mb-4">
-              Choose a custom domain name for your project (optional). If left empty, we'll generate one automatically.
-            </p>
             
-            <div>
-              <label htmlFor="customSlug" className="block text-sm font-medium text-gray-300 mb-2">
-                Custom Domain Name
-              </label>
-              <input
-                id="customSlug"
-                type="text"
-                value={customSlug}
-                onChange={(e) => setCustomSlug(e.target.value)}
-                placeholder="my-awesome-project (optional)"
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="text-gray-500 text-sm mt-1">
-                Only lowercase letters and hyphens allowed. Your site will be available at: 
-                <span className="font-mono text-blue-400 ml-1">
-                  {customSlug ? `https://${customSlug}.codebay.sbs` : 'https://[auto-generated].codebay.sbs'}
-                </span>
-              </p>
+            <div className="space-y-6">
+              {/* Custom Domain Name */}
+              <div>
+                <label htmlFor="customSlug" className="block text-sm font-medium text-gray-300 mb-2">
+                  Custom Domain Name
+                </label>
+                <input
+                  id="customSlug"
+                  type="text"
+                  value={customSlug}
+                  onChange={(e) => setCustomSlug(e.target.value)}
+                  placeholder="my-awesome-project (optional)"
+                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-gray-500 text-sm mt-1">
+                  Only lowercase letters and hyphens allowed. If left empty, we'll generate one automatically.
+                </p>
+                <p className="text-gray-400 text-sm mt-1">
+                  Your site will be available at: 
+                  <span className="font-mono text-blue-400 ml-1">
+                    {customSlug ? `https://${customSlug}.codebay.sbs` : 'https://[auto-generated].codebay.sbs'}
+                  </span>
+                </p>
+              </div>
+
+              {/* Start Directory */}
+              <div>
+                <label htmlFor="startDir" className="block text-sm font-medium text-gray-300 mb-2">
+                  Start Directory
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-mono pointer-events-none">
+                    cd&nbsp;
+                  </span>
+                  <input
+                    id="startDir"
+                    type="text"
+                    value={startDir}
+                    onChange={(e) => setStartDir(e.target.value)}
+                    placeholder="frontend, client, packages/web (optional)"
+                    className="w-full pl-12 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                  />
+                </div>
+                <div className="text-gray-500 text-sm mt-1 space-y-1">
+                  <p>
+                    Specify the folder inside your repository where your project files are located.
+                  </p>
+                  <p>
+                    <strong>Examples:</strong> <code className="bg-gray-600 px-1 rounded">frontend</code>, <code className="bg-gray-600 px-1 rounded">client</code>, <code className="bg-gray-600 px-1 rounded">packages/web</code>
+                  </p>
+                  <p>
+                    <strong>Use case:</strong> For monorepos or when your buildable code is in a subfolder instead of the root directory.
+                  </p>
+                  <p>
+                    If left empty, we'll build from the repository root directory.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
