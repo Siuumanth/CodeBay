@@ -38,6 +38,11 @@ const app = express()
 const PORT = process.env.PORT || 9000
 const server = http.createServer(app); // Express + HTTP server
 
+app.get('/test', (req, res) => {
+    res.send('API SERVER IS WORKING HEHE ')
+})
+
+
 // Socket server
 const io = new Server(server, { cors: { origin: '*' } });
 
