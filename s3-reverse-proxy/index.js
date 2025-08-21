@@ -27,20 +27,25 @@ app.use((req, res) => {
     const hostname = req.hostname; // subdomain + domain
     const subdomain = hostname.split('.')[0];   // 1st string before . is subdomain
 
-    // Rewrite "/" to "/index.html", default behaviour
+    // rewrite "/" to "/index.html", default behaviour
     if (req.url === '/') {
-        req.url = '/index.html';
+         req.url = '/index.html'; 
     }
-    const url = req.url;
 
     // The incoming URL will be resolved to THIS URL by the reverse proxy
-    const resolvesTo = `${BASE_PATH}/${subdomain}`
+    const targetUrl = `${BASE_PATH}/${subdomain}`
+
+   // console.log(`Path resolved from ${req.url} to ${targetUrl}`)
 
     // Actual function which resolves and maps the proxy request
-    proxy.web(req, res, { 
-        target: resolvesTo, 
-        changeOrigin: true // Change origin header to match target
-    })
+    proxy.web(req, res, {
+        target: targetUrl,
+        changeOrigin: true,
+          headers: {  
+        // CRITICAL FIX: The host must be the S3 bucket's hostname  
+        host: 'codebay-outputs.s3.ap-south-1.amazonaws.com'  
+    },  
+    });
 
    //  console.log(`Path resolved from ${url} to ${resolvesTo}`)
 })
