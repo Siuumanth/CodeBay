@@ -24,6 +24,20 @@ import authRouter from "./routes/auth.routes.js";
 import projectRouter from "./routes/project.routes.js";
 import deployRouter from "./routes/deploy.routes.js";
 
+import rateLimit from "express-rate-limit";
+
+// Basic rate limiter: 100 requests per 15 minutes per IP
+const deployLimiter = rateLimit({
+  windowMs: 30 * 60 * 1000, // 30 minutes
+  max: 2,                 // limit each IP to 2 deployments per window
+message: "⚠️ Too many deployment attempts. Try again in 30 minutes.",
+  standardHeaders: true,   
+  legacyHeaders: false,     
+});
+
+
+
+
 let subscriber;
 
 try {
@@ -129,7 +143,8 @@ const config = {
 
 // Step 1: start deployment
 // from here, we will run the task on ECS with the specific configs
-app.post('/api/deploy', verifyJWT, async (req, res) => {
+app.post('/api/deploy', verifyJWT, deployLimiter, async (req, res) => {
+    console.log("deployment request recived")
     const userId = req.user.id; // or req.user._id depending on your model
 
     // Project Id is basically project slug
