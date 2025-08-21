@@ -114,7 +114,8 @@ io.on('connection', (socket) => {
 
 // Add CORS middleware
 app.use(cors({
-  origin: 'http://app.codebay.sbs', 
+    // origin: 'http://localhost:5173', 
+  origin: 'https://app.codebay.sbs', 
   credentials: true
 }))
 app.use(express.json())
