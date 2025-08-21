@@ -85,6 +85,9 @@ const app = express()
 const PORT = process.env.PORT || 9000
 const server = http.createServer(app); // Express + HTTP server
 
+app.set('trust proxy', 1); // trust the reverse proxy for rate limiting 
+
+
 app.get('/test', (req, res) => {
     res.send('API SERVER IS WORKING HEHE ')
 })
