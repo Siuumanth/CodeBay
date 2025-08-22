@@ -5,7 +5,7 @@ CodeBay is a modern web application that enables developers to **deploy React-ba
 ## 🚀 Key Features
 
 - 🌐 **Git Integration** – Deploy from any Git repository (GitHub, GitLab, etc.)
-- 📊 **Real-Time Build Monitoring** – Live build logs via WebSocket streaming
+- 📊 **Real-Time Build Monitoring** – Live build logs via Redis pub/sub and WebSocket streaming
 - 🐳 **Container Deployment** – Scalable builds & deployments on AWS ECS with Docker
 - 📁 **Static Hosting with Reverse Proxy** – Efficient routing to S3-hosted static assets
 - 🔐 **Secure Authentication** – JWT-based login and session management
@@ -27,8 +27,8 @@ CodeBay/
 - **System Architecture**  
     The architecture leverages **AWS ECS for deployments**, **S3 for static hosting**, **Redis for log streaming**, and a **reverse proxy** for mapping custom project domains.
     
-    ![System Architecture](https://github.com/Siuumanth/codebay/notes/sysdesign.png)
-    
+    ![System Architecture](https://github.com/Siuumanth/CodeBay/blob/main/notes/sysdesign.png)
+  
 - **System Flow**
     1. User links Git repository
     2. CodeBay clones and builds project in container
@@ -36,7 +36,7 @@ CodeBay/
     4. Static build artifacts are stored in S3
     5. Reverse proxy maps subdomains (e.g., `project.codebay.com`) to the correct build
     
-    ![Schema](https://github.com/Siuumanth/codebay/notes/db.png)
+    ![Schema](https://github.com/Siuumanth/CodeBay/blob/main/notes/db.png?raw=true)
     
 
 ## ⚙️ Tech Stack
