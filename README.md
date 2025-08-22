@@ -7,10 +7,9 @@ CodeBay is a modern web application that enables developers to **deploy React-ba
 - 🌐 **Git Integration** – Deploy from any Git repository (GitHub, GitLab, etc.)
 - 📊 **Real-Time Build Monitoring** – Live build logs via WebSocket streaming
 - 🐳 **Container Deployment** – Scalable builds & deployments on AWS ECS with Docker
-- 🔐 **Secure Authentication** – JWT-based login and session management
 - 📁 **Static Hosting with Reverse Proxy** – Efficient routing to S3-hosted static assets
+- 🔐 **Secure Authentication** – JWT-based login and session management
 - 📈 **Deployment History** – Track project status, builds, and logs over time
-- 🖥 **Modern UI** – Responsive dashboard built with React + Tailwind CSS
 - ⚡ **Scalable Infrastructure** – Designed for concurrent builds and smooth load handling
 
 ## 🏗 Project Structure
@@ -43,12 +42,47 @@ CodeBay/
 ## ⚙️ Tech Stack
     
 - **Backend** → Node.js, Express, Socket.io
-- **Frontend** → React 19, Vite, Tailwind CSS
+- **Frontend** → React, Vite, Tailwind CSS
 - **Database** → PostgreSQL
 - **Cache & Logs** → Redis (Aiven-hosted)
 - **Deployment** → AWS ECS, S3, Docker
 - **Authentication** → JWT
 - Custom domain support
+
+## APIs:
+```js
+// const BASE_URL = "http://localhost:9000";
+// const API_BASE_URL = "http://localhost:9000";
+// const SOCKET_URL = "http://localhost:9000";
+
+const BASE_URL = "https://codebay-1.onrender.com";
+const API_BASE_URL = "https://codebay-1.onrender.com";
+const SOCKET_URL = "https://codebay-1.onrender.com";
+
+const API_ENDPOINTS = {
+  // Auth
+  REGISTER: `${BASE_URL}/api/auth/register`,
+  LOGIN: `${BASE_URL}/api/auth/login`,
+  LOGOUT: `${BASE_URL}/api/auth/logout`,
+
+  // Projects
+  GET_PROJECTS: `${BASE_URL}/api/projects`,
+  GET_PROJECT: (id) => `${BASE_URL}/api/projects/${id}`,
+  DELETE_PROJECT: (id) => `${BASE_URL}/api/projects/${id}`,
+
+  // Deployments
+  GET_ALL_DEPLOYMENTS: `${BASE_URL}/api/deployments/getall`,
+  GET_DEPLOYMENT: (id) => `${BASE_URL}/api/deployments/${id}`,
+
+  // Deploy & Logs
+  START_DEPLOY: `${BASE_URL}/api/deploy`,
+  SAVE_LOGS: `${BASE_URL}/api/logs`,
+};
+
+export { BASE_URL, API_BASE_URL, SOCKET_URL, API_ENDPOINTS };
+export default API_ENDPOINTS;
+
+```
 
 ---
 
