@@ -55,8 +55,8 @@ useEffect(() => {
       
       // Set new inactivity timer (1 minute) only if build is still running
       inactivityTimerRef.current = setTimeout(() => {
-        handleBuildError('Build timed out - no activity for 1 minute');
-      }, 60000); // 1 minute
+        handleBuildError('Build timed out - no activity for 2 minutes');
+      }, 120000); // 2 minutes
     }
   }, [messages, buildStatus]);
 

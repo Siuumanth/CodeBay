@@ -13,6 +13,16 @@ const BASE_PATH = 'https://codebay-outputs.s3.ap-south-1.amazonaws.com/__outputs
 // our new base URL of codebay is codebay.sbs
 // So project URl will be like project.codebay.sbs
 
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 60 minute
+  max: 70, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again after a while'
+});
+
+
+app.use(limiter);
 
 // test request to see if the domain works
 app.get('/test', (req, res) => {
