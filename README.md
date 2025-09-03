@@ -2,6 +2,8 @@
 
 CodeBay is a modern web application that enables developers to **deploy React-based projects directly from Git repositories** with real-time build monitoring, containerized infrastructure, and automated hosting on AWS.
 
+link - [app.codebay.sbs](app.codebay.sbs)
+
 ## 🚀 Key Features
 
 - 🌐 **Git Integration** – Deploy from any Git repository (GitHub, GitLab, etc.)
